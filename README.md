@@ -1,2 +1,3 @@
-# badminton-pairer
-A program to pair players in badminton
+# Badminton Teams
+
+A program to create badminton pairings for matches.
