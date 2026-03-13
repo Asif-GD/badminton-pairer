@@ -1,0 +1,72 @@
+import random
+from itertools import combinations
+
+
+def pair_players(player_list: list[str]):  # dict[int,list[str]]
+
+    count_of_players = len(player_list)
+
+    if count_of_players <= 4:
+        print("Next time, decide on pairs yourselves; you indecisive bums! :p")
+        return pair_4_players(player_list)
+    elif count_of_players == 5:
+        return pair_5_players(player_list)
+    elif count_of_players == 6:
+        return pair_6_players(player_list)
+    elif count_of_players == 7:
+        return pair_7_players(player_list)
+    elif count_of_players == 8:
+        return pair_8_players(player_list)
+    elif 9 <= count_of_players <= 11:
+        return pair_9_to_11_players(player_list)
+    elif count_of_players == 12:
+        return pair_12_players(player_list)
+    else:
+        return "I am unable to comply with this request. Too many players!"
+
+
+def pair_4_players(player_list: list[str]):
+    random.shuffle(player_list)
+
+    teams = list()
+    for team in combinations(player_list, 2):
+        teams.append(team)
+
+    count: int = 1
+    first_index: int = 0
+    second_index: int = len(teams) - 1
+    while first_index < second_index:
+        print(f"Match {count}: {teams[first_index]} vs. {teams[second_index]}")
+        count += 1
+        first_index += 1
+        second_index -= 1
+
+
+def pair_5_players(player_list: list[str]):
+    pass
+
+
+def pair_6_players(player_list: list[str]):
+    pass
+
+
+def pair_7_players(player_list: list[str]):
+    pass
+
+
+def pair_8_players(player_list: list[str]):
+    pass
+
+
+def pair_9_to_11_players(player_list: list[str]):
+    pass
+
+
+def pair_12_players(player_list: list[str]):
+    pass
+
+
+player_list_4 = ["Asif", "Rahul", "Mahesh", "Shiva"]
+player_list_6 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh", "Rajiv"]
+
+pair_players(player_list_4)
