@@ -1,0 +1,37 @@
+OBJECTIVE:
+    The program takes in a bunch of names and pairs them in a random manner.
+
+LIMITATIONS:
+    The program doesn't take player level into account. (for now)
+
+ALGORITHM:
+1. Initially, random numbers are assigned to each player.
+    - from 1 to total number of players.
+    - initial focus is upto 12 players for two courts.
+2. Players shouldn't be paired together more than twice in a row.
+3. Players shouldn't be benched twice in a row.
+    - it should effectively cycle all players to be benched at least once before repeating.
+4. Player count:
+    - 5 (preferably one court)
+        - 1 player benched
+    - 6 (preferably one court)
+        - pair and play against all teams before shuffle.
+        - winners play two games in a row, at most.
+        - a total of 3 games before re-pairing.
+    - 7 (preferably one court)
+        - 1 gets to pair with 2 and 7 in round 1 and round 2 of games, respectively.
+    - 8 (preferably two courts)
+        - pair and play against all teams before shuffle.
+        - a total of 6 games before re-pairing.
+    - 9 to 11 (preferably two courts)
+        - 3 players benched
+    - 12 (preferably two courts)
+        - 6 pairs, similar to a 6-player shuffle.
+        - the pairs are separated into two brackets.
+        - play against all of them in that bracket.
+        - teams are shuffled, not the pairs.
+        - a total of 15 games before re-pairing.
+
+DESIGN:
+1. A method to count the number of players and call the pairer method accordingly.
+    - initially, the method will take the players' names as a list
