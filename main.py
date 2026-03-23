@@ -44,7 +44,32 @@ def pair_4_players(player_list: list[str]):
 
 
 def pair_5_players(player_list: list[str]):
-    pass
+    benched_player = list()
+    count: int = 1
+
+    while count <= len(player_list):
+        player_list_copy = player_list.copy()
+        player_to_be_benched = random.choice(player_list)
+
+        # to ensure every player gets benched at least once
+        while player_to_be_benched in benched_player:
+            player_to_be_benched = random.choice(player_list)
+
+        benched_player.append(player_to_be_benched)
+        player_list_copy.remove(player_to_be_benched)
+
+        random.shuffle(player_list_copy)
+
+        print("------------------")
+        print(f"\t Match {count}: \t")
+        print("------------------")
+        for number in range(len(player_list)):
+            if number == len(player_list) - 1:
+                print(f"{player_to_be_benched} -> Benched")
+            else:
+                print(f"{player_list_copy[number]} -> {number + 1}")
+
+        count += 1
 
 
 def pair_6_players(player_list: list[str]):
@@ -68,6 +93,8 @@ def pair_12_players(player_list: list[str]):
 
 
 player_list_4 = ["Asif", "Rahul", "Mahesh", "Shiva"]
+player_list_5 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh"]
 player_list_6 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh", "Rajiv"]
 
 # pair_players(player_list_4)
+# pair_players(player_list_5)
