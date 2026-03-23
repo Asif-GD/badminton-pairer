@@ -35,6 +35,7 @@ def pair_4_players(player_list: list[str]):
     count: int = 1
     first_index: int = 0
     second_index: int = len(teams) - 1
+    # combinations() returns possible combinations in order
     while first_index < second_index:
         print(f"Match {count}: {teams[first_index]} vs. {teams[second_index]}")
         count += 1
@@ -69,4 +70,4 @@ def pair_12_players(player_list: list[str]):
 player_list_4 = ["Asif", "Rahul", "Mahesh", "Shiva"]
 player_list_6 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh", "Rajiv"]
 
-pair_players(player_list_4)
+# pair_players(player_list_4)
