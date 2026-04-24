@@ -73,8 +73,49 @@ def pair_5_players(player_list: list[str]):
 
 
 def pair_6_players(player_list: list[str]):
-    # priority_players =list()
-    pass
+    priority_players = list()
+    benched_players = list()
+    # priority_players = ["Mahesh", "Shiva"]
+
+    """
+    IMPLEMENTATION: -> when there are players with priority
+        - if there are players who were benched the previous game, they'd be given priority.
+        - two players from the previous match will be chosen and paired with players in priority, randomly.
+        - the remaining two players are benched and will be given priority in the next pairing, and so on.
+        
+    IMPLEMENTATION: -> no players in priority (usually, the first pairing)
+        - two players will be chosen and benched, randomly.
+        - the two players who are benched and will be given priority in the next pairing, and so on.
+    """
+    if priority_players:
+        players_without_priority = player_list.copy()
+        for player in priority_players:
+            players_without_priority.remove(player)
+
+        while len(priority_players) != 4:
+            random_player = random.choice(players_without_priority)
+            priority_players.append(random_player)
+            players_without_priority.remove(random_player)
+
+        benched_players = players_without_priority.copy()
+
+    else:
+        priority_players = player_list.copy()
+        while len(benched_players) != 2:
+            random_player = random.choice(priority_players)
+            benched_players.append(random_player)
+            priority_players.remove(random_player)
+
+    random.shuffle(priority_players)
+
+    for number in range(0, 4):
+        print(f"{priority_players[number]} -> {number + 1}")
+
+    for player in benched_players:
+        print(f"{player} -> benched")
+
+    priority_players = benched_players.copy()
+    # print(priority_players)
 
 
 def pair_7_players(player_list: list[str]):
@@ -99,3 +140,4 @@ player_list_6 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh", "Rajiv"]
 
 # pair_players(player_list_4)
 # pair_players(player_list_5)
+pair_players(player_list_6)
