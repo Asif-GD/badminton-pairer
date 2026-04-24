@@ -29,13 +29,13 @@ def pair_4_players(player_list: list[str]):
     random.shuffle(player_list)
 
     teams = list()
+    # combinations() returns possible combinations in order
     for team in combinations(player_list, 2):
         teams.append(team)
 
     count: int = 1
     first_index: int = 0
     second_index: int = len(teams) - 1
-    # combinations() returns possible combinations in order
     while first_index < second_index:
         print(f"Match {count}: {teams[first_index]} vs. {teams[second_index]}")
         count += 1
@@ -73,6 +73,7 @@ def pair_5_players(player_list: list[str]):
 
 
 def pair_6_players(player_list: list[str]):
+    # priority_players =list()
     pass
 
 
