@@ -119,7 +119,34 @@ def pair_6_players(player_list: list[str]):
 
 
 def pair_7_players(player_list: list[str]):
-    pass
+    """
+        IMPLEMENTATION: -> since there are 7 players, one player a.k.a. ace_player will play 2 matches
+        ace_player will be paired with 2nd player and the 7th player, in team 1 and team 4 respectively.
+        ace_player -> will be retrieved from db.
+        note: an ace_player list is maintained to ensure everyone gets fair number of games in a session.
+    """
+    ace_players = list()
+    non_ace_players = list()
+    team_number: int = 1
+    # ace_player = ["Rahul"]
+    # ace_player = ["Rahul", "Asif", "Mahesh", "Shiva", "Dinesh", "Rajiv", "Ankit"]
+
+    if len(ace_players) == 7:
+        # print("inside if")
+        ace_players.clear()
+        non_ace_players = player_list.copy()
+
+
+    random.shuffle(player_list)
+    ace_players.append(player_list[0])
+
+    for i in range(0, len(player_list), 2):
+        print(f"Team: {team_number}")
+        if i != 6:
+            print(f"{player_list[i]} , {player_list[i + 1]}")
+        else:
+            print(f"{player_list[i]} , {player_list[0]}")
+        team_number += 1
 
 
 def pair_8_players(player_list: list[str]):
@@ -137,7 +164,9 @@ def pair_12_players(player_list: list[str]):
 player_list_4 = ["Asif", "Rahul", "Mahesh", "Shiva"]
 player_list_5 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh"]
 player_list_6 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh", "Rajiv"]
+player_list_7 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh", "Rajiv", "Ankit"]
 
 # pair_players(player_list_4)
 # pair_players(player_list_5)
-pair_players(player_list_6)
+# pair_players(player_list_6)
+pair_players(player_list_7)
