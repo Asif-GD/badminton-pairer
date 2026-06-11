@@ -1,0 +1,69 @@
+# ALTERNATE IMPLEMENTATION FOR 7 PLAYER SHUFFLE
+
+def pair_7_players(player_list: list[str]):
+    ace_player = list()
+    team_number: int = 1
+    # ace_player = ["Rahul"]
+    """
+    IMPLEMENTATION: -> since there are 7 players, one player a.k.a. ace_player will play 2 matches
+    ace_player will be paired with 2nd player and the 7th player, in team 1 and team 4 respectively.
+    ace_player -> will be retrieved from db.
+    note: an ace_player list is maintained to ensure everyone gets fair number of games in a session.
+    """
+    if len(ace_player) == 7:
+        # print("inside if")
+        ace_player.clear()
+
+    elif len(ace_player) == 0:
+        # print("inside elif")
+        random.shuffle(player_list)
+        ace_player.append(player_list[0])
+
+        for i in range(0, len(player_list), 2):
+            print(f"Team: {team_number}")
+            if i != 6:
+                print(f"{player_list[i]} , {player_list[i + 1]}")
+            else:
+                print(f"{player_list[i]} , {player_list[0]}")
+            team_number += 1
+    else:
+        """
+        IMPLEMENTATION: -> priority_players = 2 random players from match 2, except ace player
+        player_list -> will be retrieved from db in order.
+        """
+        # print("inside else")
+        # player_list = ["Rahul", "Asif", "Mahesh", "Shiva", "Dinesh", "Rajiv", "Ankit"]
+        priority_players = list()
+        new_player_list = list()
+        # creating priority_players list
+        for number in range(4, len(player_list)):
+            priority_players.append(player_list[number])
+
+        # removing priority_players from main list
+        for player in priority_players:
+            player_list.remove(player)
+
+        for number in range(1, 5):
+            print(f"Team: {number}")
+            if number != 4:
+                random_player_1 = random.choice(priority_players)
+                random_player_2 = random.choice(player_list)
+
+                print(f"{random_player_1}, {random_player_2}")
+
+                priority_players.remove(random_player_1)
+                player_list.remove(random_player_2)
+
+                if number == 1:
+                    ace_player.append(random_player_1)
+
+            else:
+                # team 4 will consist of the ace_player and only other player remaining in player list
+                random_player_1 = player_list[0]
+                random_player_2 = ace_player[len(ace_player) - 1]
+                print(f"{random_player_1}, {random_player_2}")
+
+            # to preserve the order for next shuffle
+            new_player_list.append(random_player_1)
+            new_player_list.append(random_player_2)
+            # print(new_player_list)
