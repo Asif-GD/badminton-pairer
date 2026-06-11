@@ -44,6 +44,17 @@ def pair_4_players(player_list: list[str]):
 
 
 def pair_5_players(player_list: list[str]):
+    """
+        IMPLEMENTATION: -> when there are players with priority
+            - if there are players (usually 1) who were benched the previous game, they'd be given priority.
+            - one player from the previous match will be chosen at random and benched.
+            - the remaining four players are paired at random.
+
+        IMPLEMENTATION: -> no players in priority (usually, the first pairing)
+            - one player will be chosen and benched, randomly.
+            - the player who was benched will be given priority in the next pairing, and so on.
+    """
+
     benched_player = list()
     count: int = 1
 
@@ -73,20 +84,20 @@ def pair_5_players(player_list: list[str]):
 
 
 def pair_6_players(player_list: list[str]):
+    """
+        IMPLEMENTATION: -> when there are players with priority
+            - if there are players who were benched the previous game, they'd be given priority.
+            - two players from the previous match will be chosen and paired with players in priority, randomly.
+            - the remaining two players are benched and will be given priority in the next pairing, and so on.
+
+        IMPLEMENTATION: -> no players in priority (usually, the first pairing)
+            - two players will be chosen and benched, randomly.
+            - the two players who are benched will be given priority in the next pairing, and so on.
+    """
     priority_players = list()
     benched_players = list()
     # priority_players = ["Mahesh", "Shiva"]
 
-    """
-    IMPLEMENTATION: -> when there are players with priority
-        - if there are players who were benched the previous game, they'd be given priority.
-        - two players from the previous match will be chosen and paired with players in priority, randomly.
-        - the remaining two players are benched and will be given priority in the next pairing, and so on.
-        
-    IMPLEMENTATION: -> no players in priority (usually, the first pairing)
-        - two players will be chosen and benched, randomly.
-        - the two players who are benched and will be given priority in the next pairing, and so on.
-    """
     if priority_players:
         players_without_priority = player_list.copy()
         for player in priority_players:
@@ -135,7 +146,6 @@ def pair_7_players(player_list: list[str]):
         # print("inside if")
         ace_players.clear()
         non_ace_players = player_list.copy()
-
 
     random.shuffle(player_list)
     ace_players.append(player_list[0])
