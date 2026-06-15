@@ -137,7 +137,6 @@ def pair_7_players(player_list: list[str]):
         note: an ace_player list is maintained to ensure everyone gets fair number of games in a session.
     """
     ace_players = list()
-    non_ace_players = list()
     team_number: int = 1
     # ace_player = ["Rahul"]
     # ace_player = ["Rahul", "Asif", "Mahesh", "Shiva", "Dinesh", "Rajiv", "Ankit"]
@@ -145,7 +144,6 @@ def pair_7_players(player_list: list[str]):
     if len(ace_players) == 7:
         # print("inside if")
         ace_players.clear()
-        non_ace_players = player_list.copy()
 
     random.shuffle(player_list)
     ace_players.append(player_list[0])
