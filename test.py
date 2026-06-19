@@ -1,4 +1,5 @@
 import random
+from operator import index
 
 from main import *
 
@@ -57,3 +58,31 @@ testing skip in range()
 """
 # for i in range(0, 7, 2):
 #     print(i)
+
+"""
+testing 8-player combinations
+"""
+# # player_list_8 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh", "Rajiv", "Ankit", "Ravi"]
+# player_list_8 = ["1", "2", "3", "4", "5", "6", "7", "8"]
+# eight_player_combination = combinations(player_list_8, 2)  # -> returns an itertools.combinations object
+# # print(eight_player_combination)
+#
+# # itertools.combinations object gets destroyed after it is unpacked by the below operation
+# # for item in eight_player_combination:
+# #     print(item)
+#
+# comb_list = list(eight_player_combination)  # -> an empty list now if eight_player_combination was unpacked
+#
+# for index in range(len(comb_list)):  # -> this does nothing if comb_list is []
+#     print(f"{index} -> {comb_list[index]}")
+# # print(comb_list)
+# # print(len(comb_list))
+
+"""
+testing list reassignment
+"""
+# random_list: list[int] = [1, 2, 3, 4, 5]
+# print(f"Before reassignment: -> {random_list}")
+#
+# random_list = [random_list[-1]] # -> -1 points to the last element in list
+# print(f"After reassignment: -> {random_list}")
