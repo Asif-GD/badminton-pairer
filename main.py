@@ -55,32 +55,32 @@ def pair_5_players(player_list: list[str]):
             - the player who was benched will be given priority in the next pairing, and so on.
     """
 
-    benched_player = list()
-    count: int = 1
+    benched_player: list[str] = list()
 
-    while count <= len(player_list):
-        player_list_copy = player_list.copy()
+    # if every player has been benched at least once, the cycle starts over.
+    if len(benched_player) == len(player_list):
+        benched_player = [benched_player[-1]]
+
+    player_list_copy = player_list.copy()
+    player_to_be_benched = random.choice(player_list)
+
+    # to ensure every player gets benched at least once
+    while player_to_be_benched in benched_player:
         player_to_be_benched = random.choice(player_list)
 
-        # to ensure every player gets benched at least once
-        while player_to_be_benched in benched_player:
-            player_to_be_benched = random.choice(player_list)
+    benched_player.append(player_to_be_benched)
+    player_list_copy.remove(player_to_be_benched)
 
-        benched_player.append(player_to_be_benched)
-        player_list_copy.remove(player_to_be_benched)
+    random.shuffle(player_list_copy)
 
-        random.shuffle(player_list_copy)
+    # generate_pairs()
+    team_number: int = 1
+    for i in range(0, len(player_list_copy), 2):
+        print(f"Team: {team_number}")
+        print(f"{player_list_copy[i]} , {player_list_copy[i + 1]}")
+        team_number += 1
 
-        print("------------------")
-        print(f"\t Match {count}: \t")
-        print("------------------")
-        for number in range(len(player_list)):
-            if number == len(player_list) - 1:
-                print(f"{player_to_be_benched} -> Benched")
-            else:
-                print(f"{player_list_copy[number]} -> {number + 1}")
-
-        count += 1
+    print(f"Benched player -> {player_to_be_benched}")
 
 
 def pair_6_players(player_list: list[str]):
@@ -186,7 +186,7 @@ player_list_7 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh", "Rajiv", "Ankit"]
 player_list_8 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh", "Rajiv", "Ankit", "Ravi"]
 
 # pair_players(player_list_4)
-# pair_players(player_list_5)
+pair_players(player_list_5)
 # pair_players(player_list_6)
 # pair_players(player_list_7)
-pair_players(player_list_8)
+# pair_players(player_list_8)
