@@ -104,29 +104,69 @@ def pair_6_players(player_list: list[str]):
 
 def pair_7_players(player_list: list[str]):
     """
-        IMPLEMENTATION: -> since there are 7 players, one player a.k.a. ace_player will play 2 matches
-        ace_player will be paired with 2nd player and the 7th player, in team 1 and team 4 respectively.
-        ace_player -> will be retrieved from db.
-        note: an ace_player list is maintained to ensure everyone gets fair number of games in a session.
+        IMPLEMENTATION: -> since there are 7 players, one player a.k.a. lucky_player will play 2 matches in succession
+        lucky_player will be paired with 2nd player and the seventh_player, in team 1 and team 4 respectively.
+        lucky_player -> will be retrieved from db.
+        lucky_player will become the seventh_player for next pairing as he would have played two matches consecutively.
+        note: a lucky_player list is maintained to ensure everyone gets fair number of games in a session.
     """
-    ace_players = list()
+    lucky_player_list: list[str] = list()
+    lucky_player: str = str()
+    seventh_player: str = str()
     team_number: int = 1
-    # ace_player = ["Rahul"]
-    # ace_player = ["Rahul", "Asif", "Mahesh", "Shiva", "Dinesh", "Rajiv", "Ankit"]
 
-    if len(ace_players) == 7:
+    # lucky_player_list = ["Rahul"]
+    # lucky_player_list = ["Rahul", "Asif", "Mahesh", "Shiva", "Dinesh", "Rajiv", "Ankit"]
+
+    player_list_copy = player_list.copy()
+
+    # if every player has been a lucky_player at least once, the cycle starts over.
+    if len(lucky_player_list) == len(player_list):
         # print("inside if")
-        ace_players.clear()
+        lucky_player_list = lucky_player_list[-2:len(lucky_player_list)]
 
-    random.shuffle(player_list)
-    ace_players.append(player_list[0])
+    elif len(lucky_player_list) < len(player_list):
+        # print("inside elif")
+        lucky_player = random.choice(player_list_copy)
 
-    for i in range(0, len(player_list), 2):
+        # to ensure every player gets to be lucky_player at least once
+        while lucky_player in lucky_player_list:
+            lucky_player = random.choice(player_list_copy)
+
+        lucky_player_list.append(lucky_player)
+
+    lucky_player = lucky_player_list[-1]
+    player_list_copy.remove(lucky_player)
+
+    # usually, in case of first pairing
+    if len(lucky_player_list) == 1:
+        seventh_player = random.choice(player_list_copy)
+        player_list_copy.remove(seventh_player)
+    else:
+        """
+            we need the lucky_player from the previous pairing
+            -1 -> holds the lucky_player of this pairing
+            -2 -> holds the lucky_player of previous pairing
+        """
+        seventh_player = lucky_player_list[-2]
+        player_list_copy.remove(seventh_player)
+
+    # the lucky_player and seventh_player positions have to be preserved for proper pairings
+    random.shuffle(player_list_copy)
+    player_list_copy.insert(0, lucky_player)
+    player_list_copy.append(seventh_player)
+
+    # print(f"lucky_player_list -> {lucky_player_list}")
+    # print(f"lucky_player -> {lucky_player}")
+    # print(f"seventh_player -> {seventh_player}")
+    # print(f"player_list_copy -> {player_list_copy}")
+
+    for i in range(0, len(player_list_copy), 2):
         print(f"Team: {team_number}")
-        if i != 6:
-            print(f"{player_list[i]} , {player_list[i + 1]}")
+        if team_number != 4:
+            print(f"{player_list_copy[i]} , {player_list_copy[i + 1]}")
         else:
-            print(f"{player_list[i]} , {player_list[0]}")
+            print(f"{seventh_player} , {lucky_player}")
         team_number += 1
 
 
@@ -161,6 +201,6 @@ player_list_8 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh", "Rajiv", "Ankit",
 
 # pair_players(player_list_4)
 # pair_players(player_list_5)
-pair_players(player_list_6)
-# pair_players(player_list_7)
+# pair_players(player_list_6)
+pair_players(player_list_7)
 # pair_players(player_list_8)
