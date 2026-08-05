@@ -2,7 +2,7 @@ OBJECTIVE:
     The program takes in a bunch of names and pairs them in a random manner.
 
 LIMITATIONS:
-    The program doesn't take player level into account. (for now)
+    The program doesn't take player's proficiency at badminton into account. (for now)
 
 ALGORITHM:
 1. Initially, random numbers are assigned to each player.
@@ -32,6 +32,10 @@ ALGORITHM:
         - teams are shuffled, not the pairs.
         - a total of 15 games before re-pairing.
 
-DESIGN:
-1. A method to count the number of players and call the pairer method accordingly.
+DESIGN CHOICES:
+XX 1. A method to count the number of players and call the pairer method accordingly. XX
     - initially, the method will take the players' names as a list
+    - this idea is scraped.
+
+2. The number of players will be specified in the incoming request.
+    - the appropriate method is chosen accordingly.

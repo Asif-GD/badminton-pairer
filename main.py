@@ -85,7 +85,7 @@ def pair_5_players(player_list: list[str]):
 
 def pair_6_players(player_list: list[str]):
     """
-        IMPLEMENTATION: -> no priority
+        IMPLEMENTATION: -> no priority. 1 court.
             - players are paired in random order.
             - Match 1 -> Team 1 vs. Team 2
             - Match 2 -> Match 1 winners vs. Team 3
@@ -172,9 +172,10 @@ def pair_7_players(player_list: list[str]):
 
 def pair_8_players(player_list: list[str]):
     """
-        IMPLEMENTATION: ->
-        We assume there are two courts available.
-        At each pairing, a team will play matches against all the other teams.
+        IMPLEMENTATION: -> no priority. 2 courts.
+        - players are paired in random order.
+        - we assume there are two courts available.
+        - at each pairing, a team will play matches against all the other teams.
     """
     random.shuffle(player_list)
 
