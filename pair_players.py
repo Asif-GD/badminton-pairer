@@ -82,15 +82,10 @@ def pair_5_players(player_list: list[str]):
 
     random.shuffle(player_list_copy)
 
-    # generate_pairs()
-    team_number: int = 1
-    pairs: dict[str, str] = dict()
-    for i in range(0, len(player_list_copy), 2):
-        pairs.update({f"Team: {team_number}": f"{player_list_copy[i]} , {player_list_copy[i + 1]}"})
-        team_number += 1
+    teams = generate_pairs(player_list_copy)
+    teams.update({f"Benched player": f"{player_to_be_benched}"})
 
-    pairs.update({f"Benched player": f"{player_to_be_benched}"})
-    return pairs
+    return teams
 
 
 def pair_6_players(player_list: list[str]):
