@@ -1,12 +1,8 @@
-from pair_players import *
+from fastapi import FastAPI
 
-player_list_4 = ["Asif", "Rahul", "Mahesh", "Shiva"]
-player_list_5 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh"]
-player_list_6 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh", "Rajiv"]
-player_list_7 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh", "Rajiv", "Ankit"]
-player_list_8 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh", "Rajiv", "Ankit", "Ravi"]
+app = FastAPI()
 
-# print(pair_players(player_list_4))
-# print(pair_players(player_list_5))
-# print(pair_players(player_list_6))
-print(pair_players(player_list_8))
+
+@app.get("/")
+async def root():
+    return {"Hello World": "It works!"}
