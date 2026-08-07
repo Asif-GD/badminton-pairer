@@ -74,12 +74,13 @@ def pair_5_players(player_list: list[str]):
 
     # generate_pairs()
     team_number: int = 1
+    pairs: dict[str, str] = dict()
     for i in range(0, len(player_list_copy), 2):
-        print(f"Team: {team_number}")
-        print(f"{player_list_copy[i]} , {player_list_copy[i + 1]}")
+        pairs.update({f"Team: {team_number}": f"{player_list_copy[i]} , {player_list_copy[i + 1]}"})
         team_number += 1
 
-    print(f"Benched player -> {player_to_be_benched}")
+    pairs.update({f"Benched player": f"{player_to_be_benched}"})
+    return pairs
 
 
 def pair_6_players(player_list: list[str]):

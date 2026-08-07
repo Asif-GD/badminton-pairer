@@ -39,3 +39,5 @@ XX 1. A method to count the number of players and call the pairer method accordi
 
 2. The number of players will be specified in the incoming request.
     - the appropriate method is chosen accordingly.
+
+3. Pairs generated are returned as dict() to help with JSON conversions.
