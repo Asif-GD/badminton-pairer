@@ -24,6 +24,16 @@ def pair_players(player_list: list[str]):
         return "I am unable to comply with this request. Too many players!"
 
 
+def generate_pairs(player_list: list[str]) -> dict[str, str]:
+    team_number: int = 1
+    pairs: dict[str, str] = dict()
+    for i in range(0, len(player_list), 2):
+        pairs.update({f"Team: {team_number}": f"{player_list[i]} , {player_list[i + 1]}"})
+        team_number += 1
+
+    return pairs
+
+
 def pair_4_players(player_list: list[str]):
     random.shuffle(player_list)
 
