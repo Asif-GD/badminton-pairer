@@ -92,14 +92,12 @@ def pair_6_players(player_list: list[str]):
             - Match 3 -> Match 1 losers vs. Team 3
             - players are paired again, and so on.
     """
-    random.shuffle(player_list)
+    player_list_copy = player_list.copy()
+    random.shuffle(player_list_copy)
 
-    # generate_pairs()
-    team_number: int = 1
-    for i in range(0, len(player_list), 2):
-        print(f"Team: {team_number}")
-        print(f"{player_list[i]} , {player_list[i + 1]}")
-        team_number += 1
+    teams = generate_pairs(player_list_copy)
+
+    return teams
 
 
 def pair_7_players(player_list: list[str]):
