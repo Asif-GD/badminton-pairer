@@ -35,21 +35,12 @@ def generate_pairs(player_list: list[str]) -> dict[str, str]:
 
 
 def pair_4_players(player_list: list[str]):
-    random.shuffle(player_list)
+    player_list_copy = player_list.copy()
+    random.shuffle(player_list_copy)
 
-    teams = list()
-    # combinations() returns possible combinations in order
-    for team in combinations(player_list, 2):
-        teams.append(team)
+    teams = generate_pairs(player_list_copy)
 
-    count: int = 1
-    first_index: int = 0
-    second_index: int = len(teams) - 1
-    while first_index < second_index:
-        print(f"Match {count}: {teams[first_index]} vs. {teams[second_index]}")
-        count += 1
-        first_index += 1
-        second_index -= 1
+    return teams
 
 
 def pair_5_players(player_list: list[str]):
