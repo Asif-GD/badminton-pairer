@@ -111,13 +111,12 @@ def pair_8_players(player_list: list[str]):
         - we assume there are two courts available.
         - at each pairing, a team will play matches against all the other teams.
     """
-    random.shuffle(player_list)
+    player_list_copy = player_list.copy()
+    random.shuffle(player_list_copy)
 
-    team_number: int = 1
-    for i in range(0, len(player_list), 2):
-        print(f"Team: {team_number}")
-        print(f"{player_list[i]} , {player_list[i + 1]}")
-        team_number += 1
+    teams = generate_pairs(player_list_copy)
+
+    return teams
 
 
 def pair_9_to_11_players(player_list: list[str]):

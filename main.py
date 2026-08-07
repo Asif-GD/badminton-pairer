@@ -8,5 +8,5 @@ player_list_8 = ["Asif", "Rahul", "Mahesh", "Shiva", "Dinesh", "Rajiv", "Ankit",
 
 # print(pair_players(player_list_4))
 # print(pair_players(player_list_5))
-print(pair_players(player_list_6))
-# pair_players(player_list_8)
+# print(pair_players(player_list_6))
+print(pair_players(player_list_8))
