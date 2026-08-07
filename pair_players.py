@@ -1,5 +1,4 @@
 import random
-from itertools import combinations
 
 
 def pair_players(player_list: list[str]):
@@ -34,7 +33,7 @@ def generate_pairs(player_list: list[str]) -> dict[str, str]:
     return pairs
 
 
-def pair_4_players(player_list: list[str]):
+def pair_4_players(player_list: list[str]) -> dict[str, str]:
     """
             IMPLEMENTATION: -> no priority. 1 court.
                 - players are paired in random order.
@@ -47,7 +46,7 @@ def pair_4_players(player_list: list[str]):
     return teams
 
 
-def pair_5_players(player_list: list[str]):
+def pair_5_players(player_list: list[str]) -> dict[str, str]:
     """
         IMPLEMENTATION: -> when there are players with priority
             - if there are players (usually 1) who were benched the previous game, they'd be given priority.
@@ -83,7 +82,7 @@ def pair_5_players(player_list: list[str]):
     return teams
 
 
-def pair_6_players(player_list: list[str]):
+def pair_6_players(player_list: list[str]) -> dict[str, str]:
     """
         IMPLEMENTATION: -> no priority. 1 court.
             - players are paired in random order.
@@ -104,7 +103,7 @@ def pair_7_players(player_list: list[str]):
     pass
 
 
-def pair_8_players(player_list: list[str]):
+def pair_8_players(player_list: list[str]) -> dict[str, str]:
     """
         IMPLEMENTATION: -> no priority. 2 courts.
         - players are paired in random order.
