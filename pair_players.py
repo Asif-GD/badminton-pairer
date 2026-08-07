@@ -35,6 +35,10 @@ def generate_pairs(player_list: list[str]) -> dict[str, str]:
 
 
 def pair_4_players(player_list: list[str]):
+    """
+            IMPLEMENTATION: -> no priority. 1 court.
+            - players are paired in random order.
+    """
     player_list_copy = player_list.copy()
     random.shuffle(player_list_copy)
 
@@ -88,7 +92,8 @@ def pair_6_players(player_list: list[str]):
             - Match 3 -> Match 1 losers vs. Team 3
             - players are paired again, and so on.
     """
-    random.shuffle(player_list)
+    player_list_copy = player_list.copy()
+    random.shuffle(player_list_copy)
 
     # generate_pairs()
     team_number: int = 1
