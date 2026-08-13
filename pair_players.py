@@ -5,7 +5,7 @@ def pair_players(player_list: list[str]):
     count_of_players = len(player_list)
 
     if count_of_players <= 4:
-        print("Next time, decide on pairs yourselves; you indecisive bums! :p")
+        # print("Next time, decide on pairs yourselves; you indecisive bums! :p")
         return pair_4_players(player_list)
     elif count_of_players == 5:
         return pair_5_players(player_list)
