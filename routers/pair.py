@@ -13,7 +13,7 @@ pair_router = APIRouter(
 async def read_pairs(
         player: Annotated[list[str],
         Query(
-            title="player's name",
+            title="Player's Name",
             description="Input the players' names that are to be paired."
         )]
 ):
