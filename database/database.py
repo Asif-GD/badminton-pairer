@@ -16,13 +16,13 @@ MONGO_DB_NAME: Final[str] = "pair-db"
 MONGO_DB_URI: Final[str] = f"mongodb://{MONGO_DB_HOST}:{MONGO_DB_PORT}/{MONGO_DB_NAME}"
 
 """
-- the MongoClient will be called in the lifespan event stage in main.py.
-- if we initialize MongoClient() here, the connection is established during imports, 
+- the AsyncMongoClient will be called in the lifespan event stage in main.py.
+- if we initialize AsyncMongoClient() here, the connection is established during imports, 
     and not when the app starts. We do not want that.
 """
 
 
-# This does NOT open a new connection — it just returns a handle that borrows from the MongoClient's
+# This does NOT open a new connection — it just returns a handle that borrows from the AsyncMongoClient's
 # existing pool, so calling it per-request is cheap and safe.
 def get_db(request: Request) -> AsyncDatabase:
     # get_database() uses the database name in URI by default.
