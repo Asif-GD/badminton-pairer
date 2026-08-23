@@ -1,8 +1,9 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from pymongo import AsyncMongoClient
 
-from database.database import create_db_and_tables
+from database.database import MONGO_DB_URI
 from routers.pair import pair_router
 
 
@@ -13,16 +14,19 @@ async def lifespan(app: FastAPI):
     """
     # startup events goes here
     """
-        Although this is called everytime on startup, it won't execute unless the db-file is missing.
-        So to make changes on db, delete the db-file after adding the changes.
+        - this ensures that exactly one open and one close for the whole app's lifecycle.
+        - `app.state` is used, so route dependencies can reach it via the request.
     """
-    # create the db file and tables
-    create_db_and_tables()
+    app.state.mongo_client = AsyncMongoClient(MONGO_DB_URI)
     yield
     # shutdown events goes here
+    await app.state.mongo_client.close()
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="Badminton Pair'r",
+    lifespan=lifespan
+)
 
 app.include_router(router=pair_router)
 

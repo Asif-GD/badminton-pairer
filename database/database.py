@@ -1,36 +1,33 @@
-import os.path
 from typing import Final, Annotated
 
-from fastapi import Depends
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from fastapi import Depends, Request
+from pymongo.asynchronous.database import AsyncDatabase
 
-from database.models import Base
+"""
+    Specify the database details.
+"""
+# MONGO_DB_USERNAME: Final[str] = ""  # -> not used
+# MONGO_DB_PASSWORD: Final[str] = ""  # -> not used
+MONGO_DB_HOST: Final[str] = "localhost"
+MONGO_DB_PORT: Final[int] = 27017  # -> default port
+MONGO_DB_NAME: Final[str] = "pair-db"
 
-BASE_DIR: Final[str] = os.path.dirname(os.path.abspath(__file__))
-sqlite_file_name = "pair-app.db"
-sqlite_db_url = f"sqlite+pysqlite:///{BASE_DIR}/{sqlite_file_name}"
+# uri format -> f"mongodb://{MONGO_DB_USERNAME}:{MONGO_DB_PASSWORD}@{MONGO_DB_HOST}:{MONGO_DB_PORT}/{MONGO_DB_NAME}"
+MONGO_DB_URI: Final[str] = f"mongodb://{MONGO_DB_HOST}:{MONGO_DB_PORT}/{MONGO_DB_NAME}"
 
-# since it's normally okay to use same thread for multiple requests in FastAPI
-connect_args = {"check_same_thread": False}
-engine = create_engine(
-    url=sqlite_db_url,
-    connect_args=connect_args,
-    echo=True
-)
-
-
-def create_db_and_tables():
-    Base.metadata.create_all(bind=engine)
-
-
-LocalSession = sessionmaker(bind=engine)
+"""
+- the MongoClient will be called in the lifespan event stage in main.py.
+- if we initialize MongoClient() here, the connection is established during imports, 
+    and not when the app starts. We do not want that.
+"""
 
 
-# to ONLY open a db connection upon request
-def get_db_session():
-    with LocalSession.begin() as db_session:
-        yield db_session
+# This does NOT open a new connection — it just returns a handle that borrows from the MongoClient's
+# existing pool, so calling it per-request is cheap and safe.
+def get_db(request: Request) -> AsyncDatabase:
+    # get_database() uses the database name in URI by default.
+    return request.app.state.mongo_client.get_database(name=f"{MONGO_DB_NAME}")
 
 
-SessionDependency = Annotated[Session, Depends(get_db_session)]
+# routes just declare `db: db_dependency` instead of repeating `Depends(get_db)` everywhere.
+db_dependency = Annotated[AsyncDatabase, Depends(get_db)]
