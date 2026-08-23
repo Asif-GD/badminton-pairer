@@ -1,25 +1,48 @@
 """
 Models serve as a blueprint of the table in the database.
 """
+from typing import Annotated, Optional
 
-from sqlalchemy import String, PickleType
-from sqlalchemy.ext.mutable import MutableList
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
+
+# PyObjectId — bridges MongoDB's ObjectId and Pydantic/JSON's str
+"""
+- MongoDB stores "_id" as a BSON ObjectId, and isn't JSON-serializable. 
+- `BeforeValidator(str)` runs str() on the incoming value BEFORE Pydantic validates it as a plain string. 
+- This means a raw Mongo doc can be unpacked directly into a model (e.g. Model(**doc)) 
+    with no manual reshaping step required.
+"""
+PyObjectId = Annotated[str, BeforeValidator(str)]
 
 
-# SQLAlchemy 2.0 style
-class Base(DeclarativeBase):
-    pass
+class UserSession(BaseModel):
+    """
+        Container for a single record, as stored in / returned from MongoDB.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        arbitrary_types_allowed=True,
+        json_schema_extra={
+            "example": {
+                "_id": "507f1f77bcf86cd799439011",
+                "username": "username",
+                "session_id": "abc123",
+                "no_of_players": 3,
+                "players": ["Alex", "Bob", "Chris"],
+                "benched_player": ["Dylan"],
+                "lucky_player": ["Eric"],
+                "seventh_player": "Fred",
+            }
+        }
+    )
 
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    username: str = Field(default="username")  # retrieved via discord bot
+    session_id: str  # generated using get_session_id()
 
-class Pair(Base):
-    __tablename__ = "pairs"
+    no_of_players: int  # required
+    players: list[str]  # required -- every session must have players
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True, autoincrement=True)
-    session_id: Mapped[str] = mapped_column(String(160), unique=True)
-
-    player_list: Mapped[list] = mapped_column(MutableList.as_mutable(PickleType), default=[])
-
-    benched_player: Mapped[list] = mapped_column(MutableList.as_mutable(PickleType), default=[])
-    lucky_player: Mapped[list] = mapped_column(MutableList.as_mutable(PickleType), default=[])
-    seventh_player: Mapped[str] = mapped_column(String(80), default="")
+    benched_player: list[str] | None = None  # optional -- not every session has a benched_player
+    lucky_player: list[str] | None = None  # optional -- not every session has a lucky_player
+    seventh_player: str | None = None  # optional, single value -- only one seventh player every rotation
