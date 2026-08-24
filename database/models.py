@@ -1,7 +1,7 @@
 """
 Models serve as a blueprint of the table in the database.
 """
-from typing import Annotated, Optional
+from typing import Annotated
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 
@@ -36,7 +36,7 @@ class UserSession(BaseModel):
         }
     )
 
-    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    id: PyObjectId | None = Field(alias="_id", default=None)
     username: str = Field(default="username")  # retrieved via discord bot
     session_id: str  # generated using get_session_id()
 
