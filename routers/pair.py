@@ -1,14 +1,20 @@
-from fastapi import APIRouter
+from typing import Final
+
+from fastapi import APIRouter, HTTPException
 from starlette import status
 
 from database.database import db_dependency
 from database.models import UserSession
-from database.req_res_models import RegisterPlayersRequest
+from database.req_res_models import RegisterPlayersRequest, PairingsResponse, PairingsWithBenchedPlayerResponse
+from pair_players import pair_players, pair_5_or_9_players
 
 pair_router = APIRouter(
     prefix="/pair",
     tags=["pair"],
 )
+
+FOUR_PLAYERS: Final[str] = "place_holder_4"
+FIVE_PLAYERS: Final[str] = "place_holder_5"
 
 
 def create_session_id(username: str, player_list: list[str]) -> str:
@@ -39,7 +45,7 @@ async def register_players(players_list_request: RegisterPlayersRequest, db: db_
     session_id = create_session_id(username="place_holder", player_list=players_list_request.players)
 
     new_user_session = UserSession(
-        username="place_holder",
+        username=f"place_holder_{len(players_list_request.players)}",  # -> discord username goes here
         session_id=session_id,
         no_of_players=len(players_list_request.players),
         players=players_list_request.players,
@@ -56,3 +62,107 @@ async def register_players(players_list_request: RegisterPlayersRequest, db: db_
         "status": "Players registered successfully.",
         "Players": players_list_request.players,
     }
+
+
+@pair_router.patch(
+    "/shuffle",
+    response_description="Shuffles players and pairs them.",
+    status_code=status.HTTP_200_OK
+)
+async def shuffle_players(db: db_dependency):
+    """
+        Shuffles players and pairs them into teams and returns it to user.
+    :param db:
+    :return:
+    """
+
+    user_session_collection = db.get_collection("user_sessions")
+
+    # I plan to retrieve the player list using the username which we would get via the Discord bot.
+    # for now, a user can have at most one registered set of players i.e. one record of players.
+    # discord_username = FOUR_PLAYERS
+    discord_username = FIVE_PLAYERS
+    filter_query = {
+        "username": discord_username
+    }
+    # fields to include, '_id' is always included by default (can't combine include & exclude, except for '_id')
+    projection = {
+        "no_of_players": 1,
+        "players": 1,
+        "benched_players": 1,
+        "lucky_players": 1,
+        "seventh_player": 1,
+        "_id": 0
+    }
+
+    # find_one() because user will have at most one session
+    """
+        doc : {
+            "no_of_player" : int,
+            "players" : list[str],
+            "benched_players": list[str],
+            "lucky_players": list[str],
+            "seventh_player": str
+        }
+    """
+    doc = await user_session_collection.find_one(filter_query, projection)
+
+    if doc is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No session found for user '{discord_username}'"
+        )
+
+    player_count = doc["no_of_players"]
+    players = doc["players"]
+    benched_players = doc["benched_players"]
+    lucky_players = doc["lucky_players"]
+    seventh_player = doc["seventh_player"]
+
+    if player_count == 5:
+        return await handle_5_or_9_player_pairings(players=players, benched_players=benched_players, db=db)
+
+    else:
+        return await handle_player_pairings(players=players)
+    # else:
+    #     return "I am unable to comply with this request. Too many players!"
+
+
+async def handle_player_pairings(players: list[str]) -> PairingsResponse:
+    """
+        Wraps the pair_players() into the PairingsResponse model.
+    :param players:
+    :return:
+    """
+    pairings = pair_players(player_list=players)
+    return PairingsResponse(teams=pairings)
+
+
+async def handle_5_or_9_player_pairings(players: list[str], benched_players: list[str],
+                                        db: db_dependency) -> PairingsWithBenchedPlayerResponse:
+    """
+        Wraps the pair_5_or_9_players() into the PairingsWithBenchedPlayerResponse model. Also updates db.
+    :param db:
+    :param benched_players:
+    :param players:
+    :return:
+    """
+
+    pairings, benched_players = pair_5_or_9_players(player_list=players, benched_player_list=benched_players)
+
+    user_session_collection = db.get_collection("user_sessions")
+
+    # I plan to retrieve the player list using the username which we would get via the Discord bot.
+    # for now, a user can have at most one registered set of players i.e. one record of players.
+    discord_username = FIVE_PLAYERS
+    filter_query = {
+        "username": discord_username
+    }
+
+    # update_one() because a user can have at most one registered set of players i.e. one record of players.
+    result = await user_session_collection.update_one(
+        filter_query,
+        update={"$set": {"benched_players": benched_players}},
+    )
+
+    return PairingsWithBenchedPlayerResponse(teams=pairings, benched_player=benched_players[-1])
