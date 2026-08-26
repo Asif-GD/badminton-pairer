@@ -25,24 +25,33 @@ class UserSession(BaseModel):
         json_schema_extra={
             "example": {
                 "_id": "507f1f77bcf86cd799439011",
-                "username": "username",
+                "username": "discord_username",
                 "session_id": "abc123",
                 "no_of_players": 3,
-                "players": ["Alex", "Bob", "Chris"],
-                "benched_player": ["Dylan"],
-                "lucky_player": ["Eric"],
+                "players": ["Alex", "Bob", "Chris", "Dylan", "Eric"],
+                "benched_players": ["Eric"],
+                "lucky_players": ["Bob"],
                 "seventh_player": "Fred",
             }
         }
     )
 
     id: PyObjectId | None = Field(alias="_id", default=None)
-    username: str = Field(default="username")  # retrieved via discord bot
+    username: str  # retrieved via discord bot
     session_id: str  # generated using get_session_id()
 
     no_of_players: int  # required
     players: list[str]  # required -- every session must have players
 
-    benched_player: list[str] | None = None  # optional -- not every session has a benched_player
-    lucky_player: list[str] | None = None  # optional -- not every session has a lucky_player
+    """
+        - better to use 'default_factory=list' and not use '[]' at class level;
+        - because there is a possibility that a '[]' will become a single shared mutable object, 
+        - reused across all instance of this class;
+        - a default_factory avoids that by creating a fresh empty list per instance.
+    """
+    # empty list default -- not every session has a benched_player
+    benched_players: list[str] = Field(default_factory=list)
+    # empty list default -- not every session has a lucky_player
+    lucky_players: list[str] = Field(default_factory=list)
+
     seventh_player: str | None = None  # optional, single value -- only one seventh player every rotation
