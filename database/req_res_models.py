@@ -8,7 +8,7 @@ class RegisterPlayersRequest(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "players": ["Alex_Adams", "Bob", "Chris"]
+                "players": ["Alex_Adams", "Bob", "Chris", "Dylan"]
             }
         }
     )
@@ -36,3 +36,35 @@ class RegisterPlayersRequest(BaseModel):
                 raise ValueError(f"Name '{name}' must be at least 3 characters long.")
 
         return v
+
+
+class PairingsResponse(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "teams": {
+                    "1": "Alex, Ben",
+                    "2": "Chris, Dylan"
+                },
+            }
+        }
+    )
+
+    teams: dict[str, str]
+
+
+class PairingsWithBenchedPlayerResponse(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "teams": {
+                    "1": "Alex, Ben",
+                    "2": "Chris, Dylan"
+                },
+                "benched_player": "Eric"
+            }
+        }
+    )
+
+    teams: dict[str, str]
+    benched_player: str
