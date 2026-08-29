@@ -6,15 +6,23 @@ from starlette import status
 from database.database import db_dependency
 from database.models import UserSession
 from database.req_res_models import RegisterPlayersRequest, PairingsResponse, PairingsWithBenchedPlayerResponse
-from pair_players import pair_players, pair_5_or_9_players
+from pair_players import pair_5_9_10_or_11_players, pair_4_6_or_8_players
 
 pair_router = APIRouter(
     prefix="/pair",
     tags=["pair"],
 )
 
+# test accounts
 FOUR_PLAYERS: Final[str] = "place_holder_4"
 FIVE_PLAYERS: Final[str] = "place_holder_5"
+SIX_PLAYERS: Final[str] = "place_holder_6"
+SEVEN_PLAYERS: Final[str] = "place_holder_7"
+EIGHT_PLAYERS: Final[str] = "place_holder_8"
+NINE_PLAYERS: Final[str] = "place_holder_9"
+TEN_PLAYERS: Final[str] = "place_holder_10"
+ELEVEN_PLAYERS: Final[str] = "place_holder_11"
+TWELVE_PLAYERS: Final[str] = "place_holder_12"
 
 
 def create_session_id(username: str, player_list: list[str]) -> str:
@@ -80,8 +88,7 @@ async def shuffle_players(db: db_dependency):
 
     # I plan to retrieve the player list using the username which we would get via the Discord bot.
     # for now, a user can have at most one registered set of players i.e. one record of players.
-    # discord_username = FOUR_PLAYERS
-    discord_username = FIVE_PLAYERS
+    discord_username = EIGHT_PLAYERS
     filter_query = {
         "username": discord_username
     }
@@ -119,27 +126,27 @@ async def shuffle_players(db: db_dependency):
     lucky_players = doc["lucky_players"]
     seventh_player = doc["seventh_player"]
 
-    if player_count == 5:
-        return await handle_5_or_9_player_pairings(players=players, benched_players=benched_players, db=db)
+    if player_count == 5 or player_count == 9 or player_count == 10 or player_count == 11:
+        return await handle_5_9_10_or_11_player_pairings(players=players, benched_players=benched_players, db=db)
 
     else:
-        return await handle_player_pairings(players=players)
+        return await handle_4_6_or_8_player_pairings(players=players)
     # else:
     #     return "I am unable to comply with this request. Too many players!"
 
 
-async def handle_player_pairings(players: list[str]) -> PairingsResponse:
+async def handle_4_6_or_8_player_pairings(players: list[str]) -> PairingsResponse:
     """
-        Wraps the pair_players() into the PairingsResponse model.
+        Wraps the pair_4_6_8_12_players() into the PairingsResponse model.
     :param players:
     :return:
     """
-    pairings = pair_players(player_list=players)
+    pairings = pair_4_6_or_8_players(player_list=players)
     return PairingsResponse(teams=pairings)
 
 
-async def handle_5_or_9_player_pairings(players: list[str], benched_players: list[str],
-                                        db: db_dependency) -> PairingsWithBenchedPlayerResponse:
+async def handle_5_9_10_or_11_player_pairings(players: list[str], benched_players: list[str],
+                                              db: db_dependency) -> PairingsWithBenchedPlayerResponse:
     """
         Wraps the pair_5_or_9_players() into the PairingsWithBenchedPlayerResponse model. Also updates db.
     :param db:
@@ -148,13 +155,13 @@ async def handle_5_or_9_player_pairings(players: list[str], benched_players: lis
     :return:
     """
 
-    pairings, benched_players = pair_5_or_9_players(player_list=players, benched_player_list=benched_players)
+    pairings, benched_players = pair_5_9_10_or_11_players(player_list=players, benched_player_list=benched_players)
 
     user_session_collection = db.get_collection("user_sessions")
 
     # I plan to retrieve the player list using the username which we would get via the Discord bot.
     # for now, a user can have at most one registered set of players i.e. one record of players.
-    discord_username = FIVE_PLAYERS
+    discord_username = ELEVEN_PLAYERS
     filter_query = {
         "username": discord_username
     }
@@ -165,4 +172,9 @@ async def handle_5_or_9_player_pairings(players: list[str], benched_players: lis
         update={"$set": {"benched_players": benched_players}},
     )
 
-    return PairingsWithBenchedPlayerResponse(teams=pairings, benched_player=benched_players[-1])
+    # we only return the players benched this turn and not the entire list
+    no_of_players_to_be_benched = len(players) % 4
+    benched_players = benched_players[- no_of_players_to_be_benched:]
+    benched_players: str = ", ".join(benched_players)  # converts the list[str] to str
+
+    return PairingsWithBenchedPlayerResponse(teams=pairings, benched_player=benched_players)
