@@ -6,7 +6,7 @@ from starlette import status
 from database.database import db_dependency
 from database.models import UserSession
 from database.req_res_models import RegisterPlayersRequest, PairingsResponse, PairingsWithBenchedPlayerResponse
-from pair_players import pair_5_9_10_or_11_players, pair_4_6_or_8_players
+from pair_players import pair_5_9_10_or_11_players, pair_4_6_or_8_players, pair_7_players
 
 pair_router = APIRouter(
     prefix="/pair",
@@ -88,7 +88,7 @@ async def shuffle_players(db: db_dependency):
 
     # I plan to retrieve the player list using the username which we would get via the Discord bot.
     # for now, a user can have at most one registered set of players i.e. one record of players.
-    discord_username = EIGHT_PLAYERS
+    discord_username = SEVEN_PLAYERS
     filter_query = {
         "username": discord_username
     }
@@ -128,7 +128,9 @@ async def shuffle_players(db: db_dependency):
 
     if player_count == 5 or player_count == 9 or player_count == 10 or player_count == 11:
         return await handle_5_9_10_or_11_player_pairings(players=players, benched_players=benched_players, db=db)
-
+    elif player_count == 7:
+        return await handle_7_player_pairings(players=players, lucky_players=lucky_players,
+                                              seventh_player=seventh_player, db=db)
     else:
         return await handle_4_6_or_8_player_pairings(players=players)
     # else:
@@ -178,3 +180,42 @@ async def handle_5_9_10_or_11_player_pairings(players: list[str], benched_player
     benched_players: str = ", ".join(benched_players)  # converts the list[str] to str
 
     return PairingsWithBenchedPlayerResponse(teams=pairings, benched_player=benched_players)
+
+
+async def handle_7_player_pairings(players: list[str], lucky_players: list[str], seventh_player: str,
+                                   db: db_dependency) -> PairingsResponse:
+    """
+        Wraps the pair_7_players() into the PairingsResponse model. Also updates db.
+    :param players:
+    :param lucky_players:
+    :param seventh_player:
+    :param db:
+    :return:
+    """
+
+    pairings, lucky_players, seventh_player = pair_7_players(player_list=players, lucky_player_list=lucky_players,
+                                                             seventh_player=seventh_player)
+
+    user_session_collection = db.get_collection("user_sessions")
+
+    # I plan to retrieve the player list using the username which we would get via the Discord bot.
+    # for now, a user can have at most one registered set of players i.e. one record of players.
+    discord_username = SEVEN_PLAYERS
+    filter_query = {
+        "username": discord_username
+    }
+
+    fields_to_update = {
+        "lucky_players": lucky_players,
+        "seventh_player": seventh_player
+    }
+
+    # update_one() because a user can have at most one registered set of players i.e. one record of players.
+    result = await user_session_collection.update_one(
+        filter_query,
+        update={
+            "$set": fields_to_update
+        },
+    )
+
+    return PairingsResponse(teams=pairings)

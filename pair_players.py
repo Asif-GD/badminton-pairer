@@ -123,8 +123,60 @@ def pair_5_9_10_or_11_players(player_list: list[str], benched_player_list: list[
 #     return teams
 
 
-def pair_7_players(player_list: list[str]):
-    pass
+def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh_player: str) \
+        -> tuple[dict[str, str], list[str], str]:
+    """
+        IMPLEMENTATION:
+            - since there are 7 players, one player a.k.a. lucky_player will play 2 matches in succession
+            - lucky_player will be paired with 2nd player and the seventh_player,
+                in team 1 and team 4 respectively.
+            - the lucky_player will become the seventh_player for next pairing
+                as he would have played two matches consecutively.
+            - lucky_player & seventh_player will be retrieved from db.
+            - a lucky_player list is maintained to ensure everyone gets fair number of games in a session.
+    """
+    player_list_copy = player_list.copy()
+    lucky_players: list[str] = lucky_player_list.copy()
+
+    """
+    - if every player has been a lucky_player at least once, the cycle starts over.
+    - the very first player in the lucky_players list becomes the lucky player again in this pairing.
+    - else, a random player becomes a lucky player
+    """
+    if len(lucky_players) == len(player_list):
+        lucky_player_this_pairing = lucky_players.pop(0)
+
+    else:
+        lucky_player_this_pairing = random.choice(player_list_copy)
+
+        # to ensure every player gets to be lucky_player at least once
+        while lucky_player_this_pairing in lucky_player_list:
+            lucky_player_this_pairing = random.choice(player_list_copy)
+
+    lucky_players.append(lucky_player_this_pairing)
+    player_list_copy.remove(lucky_player_this_pairing)
+
+    seventh_player: str = seventh_player
+    if not seventh_player:  # -> usually in case of first pairing
+        seventh_player = random.choice(player_list_copy)
+    player_list_copy.remove(seventh_player)
+
+    """
+    - the lucky_player and seventh_player positions have to be preserved for proper pairings
+    - the lucky_player_this_pairing is inserted twice, at the start and at the end of the list
+        to prevent generate_pairs() from running into list index out of range error.
+    """
+    random.shuffle(player_list_copy)
+    player_list_copy.insert(0, lucky_player_this_pairing)
+    player_list_copy.append(seventh_player)
+    player_list_copy.append(lucky_player_this_pairing)
+
+    teams = generate_pairs(player_list_copy)
+
+    # after the teams are generated, the lucky_player_this_pairing becomes seventh_player for next pairing
+    seventh_player = lucky_player_this_pairing
+
+    return teams, lucky_players, seventh_player
 
 
 # def pair_8_players(player_list: list[str]) \
