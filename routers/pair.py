@@ -120,19 +120,20 @@ async def shuffle_players(db: db_dependency):
             detail=f"No session found for user '{discord_username}'"
         )
 
-    player_count = doc["no_of_players"]
-    players = doc["players"]
-    benched_players = doc["benched_players"]
-    lucky_players = doc["lucky_players"]
-    seventh_player = doc["seventh_player"]
+    db_player_count = doc["no_of_players"]
+    db_players = doc["players"]
+    db_benched_players = doc["benched_players"]
+    db_lucky_players = doc["lucky_players"]
+    db_seventh_player = doc["seventh_player"]
 
-    if player_count == 5 or player_count == 9 or player_count == 10 or player_count == 11:
-        return await handle_5_9_10_or_11_player_pairings(players=players, benched_players=benched_players, db=db)
-    elif player_count == 7:
-        return await handle_7_player_pairings(players=players, lucky_players=lucky_players,
-                                              seventh_player=seventh_player, db=db)
+    if db_player_count == 5 or db_player_count == 9 or db_player_count == 10 or db_player_count == 11:
+        return await handle_5_9_10_or_11_player_pairings(players=db_players, benched_players=db_benched_players,
+                                                         db=db)
+    elif db_player_count == 7:
+        return await handle_7_player_pairings(players=db_players, lucky_players=db_lucky_players,
+                                              seventh_player=db_seventh_player, db=db)
     else:
-        return await handle_4_6_or_8_player_pairings(players=players)
+        return await handle_4_6_or_8_player_pairings(players=db_players)
     # else:
     #     return "I am unable to comply with this request. Too many players!"
 
