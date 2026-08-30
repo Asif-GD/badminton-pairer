@@ -140,7 +140,8 @@ def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh
     return teams, lucky_players, seventh_player
 
 
-def pair_12_players(player_list: list[str]):
+def pair_12_players(player_list: list[str]) \
+        -> dict[str, str]:
     """
         IMPLEMENTATION: -> no priority.
             - players are paired in random order.
