@@ -142,7 +142,7 @@ async def shuffle_players(db: db_dependency):
 
 async def handle_4_6_or_8_player_pairings(players: list[str]) -> PairingsResponse:
     """
-        Wraps the pair_4_6_8_12_players() into the PairingsResponse model.
+        Wraps the pair_4_6_8_players() into the PairingsResponse model.
     :param players:
     :return:
     """
