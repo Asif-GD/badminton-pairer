@@ -75,8 +75,12 @@ def pair_5_9_10_or_11_players(player_list: list[str], benched_player_list: list[
     - we ensure that the len(benched_players) does not exceed the len(player_list)
     - why? we have set that when every one is benched at least once, the cycle starts over.
     - in case of 11 players, since 3 players are to be benched, at 4th iteration that logic would break. 
+    note: a minor issue, this would flip(reverse) the order in case of 2 or 3 players to be benched.
+        - because the player to be benched is chosen at random.
+    - an alternate implementation was to simply clear the benched_players list;
+        except for the players that were benched the previous turn
+    - but that would mean the order at which the players were benched gets completely tossed out. 
     """
-    # note: a minor issue, this would flip(reverse) the order in case of 2 or 3 players to be benched.
     while len(player_list) - len(benched_players) < no_of_players_to_be_benched:
         benched_players.pop(0)
 
@@ -93,17 +97,6 @@ def pair_5_9_10_or_11_players(player_list: list[str], benched_player_list: list[
         player_list_copy.remove(player_to_be_benched)
 
         no_of_players_to_be_benched -= 1
-
-    # this might not be required
-    # # if every player has been benched at least once, the cycle starts over.
-    # if len(benched_players) == len(player_list):
-    #     # -> removes every other player except the player(s) that was benched last turn
-    #     if no_of_players_to_be_benched == 1:
-    #         benched_players = benched_players[-1:]  # slicing returns a list, so need to wrap it in []
-    #     elif no_of_players_to_be_benched == 2:
-    #         benched_players = benched_players[-2:]
-    #     else:
-    #         benched_players = benched_players[-3:]
 
     random.shuffle(player_list_copy)
 
