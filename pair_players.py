@@ -57,7 +57,7 @@ def pair_5_9_10_or_11_players(player_list: list[str], benched_player_list: list[
         5 players -> after 5th iteration
         9 players -> after 9th iteration
         10 players -> after 5th iteration
-        11 players -> after 4th iteration
+        11 players -> at 4th iteration
     """
     while no_of_players_to_be_benched != 0:
         player_to_be_benched = random.choice(player_list_copy)
