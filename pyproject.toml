@@ -3,4 +3,7 @@ name = "badminton-pairer"
 version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "fastapi[standard]>=0.141.1",
+    "pymongo>=4.17.0",
+]

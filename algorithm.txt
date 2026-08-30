@@ -41,3 +41,10 @@ XX 1. A method to count the number of players and call the pairer method accordi
     - the appropriate method is chosen accordingly.
 
 3. Pairs generated are returned as dict() to help with JSON conversions.
+
+4. Will be switching to MongoDB, a non-relational db.
+    - it is necessary to maintain player_list, benched_player, and lucky_player as list[str]
+    - it isn't supported in SQLAlchemy, in a straight forward way.
+    - I tried using MutableList, but that brought its own set of challenges.
+    - I could try using 1dim-array in PostgreSQL.
+    - In any case, I do not require any relational mapping, ACID transactions or complex joins in my db. So, switching to MongoDB seems wise.

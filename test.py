@@ -1,5 +1,6 @@
 import random
 from operator import index
+from traceback import print_tb
 
 from main import *
 
@@ -86,3 +87,34 @@ testing list reassignment
 #
 # random_list = [random_list[-1]] # -> -1 points to the last element in list
 # print(f"After reassignment: -> {random_list}")
+
+"""
+testing create_session_id
+"""
+# def create_session_id(username: str, player_list: list[str]) -> str:
+#     session_id: str = username
+#     for player in player_list:
+#         for index in range(0, 3):
+#             session_id += player[index]
+#
+#     return session_id
+#
+#
+# print(player_list_4)
+# print(create_session_id(username="username", player_list=player_list_4))
+# print(player_list_6)
+# print(create_session_id(username="username", player_list=player_list_6))
+
+"""
+testing string <-> list conversion
+"""
+# sample_string = "['1_Asif', '2_Violet', '3_Indigo', '4_Blue', '5_Yellow']"
+# sample_list = ['1_Asif', '2_Violet', '3_Indigo', '4_Blue', '5_Yellow']
+#
+# sample_string_2 = str(sample_list)
+# print(sample_string_2)
+#
+# sample_string_2 += "[6_Orange]"
+# print(sample_string_2)
+#
+# print(list(sample_string))
