@@ -141,4 +141,18 @@ def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh
 
 
 def pair_12_players(player_list: list[str]):
-    pass
+    """
+        IMPLEMENTATION: -> no priority.
+            - players are paired in random order.
+    """
+    """
+        - note -> although the core logic is the same as pair_4_6_or_8_players(), 
+            in the future the return response would change based on number of courts available. 
+        - So, keeping it separate for now.
+    """
+    player_list_copy = player_list.copy()
+    random.shuffle(player_list_copy)
+
+    teams = generate_pairs(player_list_copy)
+
+    return teams

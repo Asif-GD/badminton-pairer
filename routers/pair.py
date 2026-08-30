@@ -6,7 +6,7 @@ from starlette import status
 from database.database import db_dependency
 from database.models import UserSession
 from database.req_res_models import RegisterPlayersRequest, PairingsResponse, PairingsWithBenchedPlayerResponse
-from pair_players import pair_5_9_10_or_11_players, pair_4_6_or_8_players, pair_7_players
+from pair_players import *
 
 pair_router = APIRouter(
     prefix="/pair",
@@ -88,7 +88,7 @@ async def shuffle_players(db: db_dependency):
 
     # I plan to retrieve the player list using the username which we would get via the Discord bot.
     # for now, a user can have at most one registered set of players i.e. one record of players.
-    discord_username = SEVEN_PLAYERS
+    discord_username = TWELVE_PLAYERS
     filter_query = {
         "username": discord_username
     }
@@ -126,16 +126,18 @@ async def shuffle_players(db: db_dependency):
     db_lucky_players = doc["lucky_players"]
     db_seventh_player = doc["seventh_player"]
 
-    if db_player_count == 5 or db_player_count == 9 or db_player_count == 10 or db_player_count == 11:
+    if db_player_count == 4 or db_player_count == 6 or db_player_count == 8:
+        return await handle_4_6_or_8_player_pairings(players=db_players)
+    elif db_player_count == 5 or db_player_count == 9 or db_player_count == 10 or db_player_count == 11:
         return await handle_5_9_10_or_11_player_pairings(players=db_players, benched_players=db_benched_players,
                                                          db=db)
     elif db_player_count == 7:
         return await handle_7_player_pairings(players=db_players, lucky_players=db_lucky_players,
                                               seventh_player=db_seventh_player, db=db)
+    elif db_player_count == 12:
+        return await handle_12_player_pairings(players=db_players)
     else:
-        return await handle_4_6_or_8_player_pairings(players=db_players)
-    # else:
-    #     return "I am unable to comply with this request. Too many players!"
+        return "I am unable to comply with this request. Too many players!"
 
 
 async def handle_4_6_or_8_player_pairings(players: list[str]) -> PairingsResponse:
@@ -225,4 +227,14 @@ async def handle_7_player_pairings(players: list[str], lucky_players: list[str],
         },
     )
 
+    return PairingsResponse(teams=pairings)
+
+
+async def handle_12_player_pairings(players: list[str]) -> PairingsResponse:
+    """
+        Wraps the pair_12_players() into the PairingsResponse model.
+    :param players:
+    :return:
+    """
+    pairings = pair_12_players(player_list=players)
     return PairingsResponse(teams=pairings)
