@@ -1,27 +1,6 @@
 import random
 
 
-# def pair_players(player_list: list[str]):
-#     count_of_players = len(player_list)
-#
-#     if count_of_players <= 4:
-#         return pair_4_players(player_list)
-#     # elif count_of_players == 5:
-#     #     return pair_5_players(player_list)
-#     elif count_of_players == 6:
-#         return pair_6_players(player_list)
-#     # elif count_of_players == 7:
-#     #     return pair_7_players(player_list)
-#     elif count_of_players == 8:
-#         return pair_8_players(player_list)
-#     elif 10 <= count_of_players <= 11:
-#         return pair_10_or_11_players(player_list)
-#     elif count_of_players == 12:
-#         return pair_12_players(player_list)
-#     else:
-#         return "I am unable to comply with this request. Too many players!"
-
-
 def generate_pairs(player_list: list[str]) \
         -> dict[str, str]:
     team_number: int = 1
@@ -105,24 +84,6 @@ def pair_5_9_10_or_11_players(player_list: list[str], benched_player_list: list[
     return teams, benched_players
 
 
-# def pair_6_players(player_list: list[str]) \
-#         -> dict[str, str]:
-#     """
-#         IMPLEMENTATION: -> no priority. 1 court.
-#             - players are paired in random order.
-#             - Match 1 -> Team 1 vs. Team 2
-#             - Match 2 -> Match 1 winners vs. Team 3
-#             - Match 3 -> Match 1 losers vs. Team 3
-#             - players are paired again, and so on.
-#     """
-#     player_list_copy = player_list.copy()
-#     random.shuffle(player_list_copy)
-#
-#     teams = generate_pairs(player_list_copy)
-#
-#     return teams
-
-
 def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh_player: str) \
         -> tuple[dict[str, str], list[str], str]:
     """
@@ -179,25 +140,5 @@ def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh
     return teams, lucky_players, seventh_player
 
 
-# def pair_8_players(player_list: list[str]) \
-#         -> dict[str, str]:
-#     """
-#         IMPLEMENTATION: -> no priority. 2 courts.
-#         - players are paired in random order.
-#         - we assume there are two courts available.
-#         - at each pairing, a team will play matches against all the other teams.
-#     """
-#     player_list_copy = player_list.copy()
-#     random.shuffle(player_list_copy)
-#
-#     teams = generate_pairs(player_list_copy)
-#
-#     return teams
-
-
-# def pair_10_or_11_players(player_list: list[str]):
-#     pass
-#
-#
 def pair_12_players(player_list: list[str]):
     pass
