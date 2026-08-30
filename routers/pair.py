@@ -151,7 +151,7 @@ async def handle_4_6_or_8_player_pairings(players: list[str]) -> PairingsRespons
 async def handle_5_9_10_or_11_player_pairings(players: list[str], benched_players: list[str],
                                               db: db_dependency) -> PairingsWithBenchedPlayerResponse:
     """
-        Wraps the pair_5_or_9_players() into the PairingsWithBenchedPlayerResponse model. Also updates db.
+        Wraps the handle_5_9_10_or_11_player_pairings() into the PairingsWithBenchedPlayerResponse model. Also updates db.
     :param db:
     :param benched_players:
     :param players:
@@ -169,10 +169,16 @@ async def handle_5_9_10_or_11_player_pairings(players: list[str], benched_player
         "username": discord_username
     }
 
+    fields_to_update = {
+        "benched_players": benched_players
+    }
+
     # update_one() because a user can have at most one registered set of players i.e. one record of players.
     result = await user_session_collection.update_one(
         filter_query,
-        update={"$set": {"benched_players": benched_players}},
+        update={
+            "$set": fields_to_update
+        },
     )
 
     # we only return the players benched this turn and not the entire list
