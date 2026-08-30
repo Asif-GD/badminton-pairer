@@ -88,7 +88,7 @@ async def shuffle_players(db: db_dependency):
 
     # I plan to retrieve the player list using the username which we would get via the Discord bot.
     # for now, a user can have at most one registered set of players i.e. one record of players.
-    discord_username = TWELVE_PLAYERS
+    discord_username = FIVE_PLAYERS
     filter_query = {
         "username": discord_username
     }
@@ -166,7 +166,7 @@ async def handle_5_9_10_or_11_player_pairings(players: list[str], benched_player
 
     # I plan to retrieve the player list using the username which we would get via the Discord bot.
     # for now, a user can have at most one registered set of players i.e. one record of players.
-    discord_username = ELEVEN_PLAYERS
+    discord_username = FIVE_PLAYERS
     filter_query = {
         "username": discord_username
     }

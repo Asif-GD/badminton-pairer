@@ -40,6 +40,7 @@ def pair_5_9_10_or_11_players(player_list: list[str], benched_player_list: list[
     """
 
     benched_players = benched_player_list.copy()
+    player_list_copy = player_list.copy()
 
     # set number of players to be benched
     """
@@ -48,32 +49,29 @@ def pair_5_9_10_or_11_players(player_list: list[str], benched_player_list: list[
         10 players -> 2 players are benched
         11 players -> 3 players are benched
     """
-    no_of_players_to_be_benched = len(player_list) % 4
+    no_of_players_to_be_benched = len(player_list_copy) % 4
 
     """
-    - we ensure that the len(benched_players) does not exceed the len(player_list)
-    - why? we have set that when every one is benched at least once, the cycle starts over.
-    - in case of 11 players, since 3 players are to be benched, at 4th iteration that logic would break. 
-    note: a minor issue, this would flip(reverse) the order in case of 2 or 3 players to be benched.
-        - because the player to be benched is chosen at random.
-    - an alternate implementation was to simply clear the benched_players list;
-        except for the players that were benched the previous turn
-    - but that would mean the order at which the players were benched gets completely tossed out. 
+    - after every player has been benched at least once, the cycle starts over.
+    - in case of 
+        5 players -> after 5th iteration
+        9 players -> after 9th iteration
+        10 players -> after 5th iteration
+        11 players -> after 4th iteration
     """
-    while len(player_list) - len(benched_players) < no_of_players_to_be_benched:
-        benched_players.pop(0)
-
-    player_list_copy = player_list.copy()
-
     while no_of_players_to_be_benched != 0:
-        player_to_be_benched = random.choice(player_list)
+        player_to_be_benched = random.choice(player_list_copy)
 
         # to ensure every player gets benched at least once
         while player_to_be_benched in benched_players:
-            player_to_be_benched = random.choice(player_list)
+            player_to_be_benched = random.choice(player_list_copy)
 
         benched_players.append(player_to_be_benched)
         player_list_copy.remove(player_to_be_benched)
+
+        # after every player has been benched at least once, the cycle starts over.
+        if len(player_list) == len(benched_players):  # -> note: we use player_list and not player_list_copy
+            benched_players.pop(0)
 
         no_of_players_to_be_benched -= 1
 
