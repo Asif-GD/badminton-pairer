@@ -26,7 +26,7 @@ MONGO_DB_URI: Final[str] = f"mongodb://{MONGO_DB_HOST}:{MONGO_DB_PORT}/{MONGO_DB
 # existing pool, so calling it per-request is cheap and safe.
 def get_db(request: Request) -> AsyncDatabase:
     # get_database() uses the database name in URI by default.
-    return request.app.state.mongo_client.get_database(name=f"{MONGO_DB_NAME}")
+    return request.app.state.mongo_client.get_database(name=MONGO_DB_NAME)
 
 
 # routes just declare `db: db_dependency` instead of repeating `Depends(get_db)` everywhere.
