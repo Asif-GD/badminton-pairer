@@ -5,6 +5,7 @@ from pymongo import AsyncMongoClient
 
 from database.database import MONGO_DB_URI
 from routers.pair import pair_router
+from routers.user import user_router
 
 
 @asynccontextmanager
@@ -29,6 +30,7 @@ app = FastAPI(
 )
 
 app.include_router(router=pair_router)
+app.include_router(router=user_router)
 
 
 @app.get("/")

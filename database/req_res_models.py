@@ -85,3 +85,19 @@ class PairingsWithBenchedPlayerResponse(BaseModel):
 
     teams: dict[str, str]
     benched_player: str
+
+
+class ListPlayersResponse(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "username": "username",
+                "no_of_players": 4,
+                "players": "Alex, Bob, Chris, Dylan"
+            }
+        }
+    )
+
+    username: str
+    no_of_players: int
+    players: str
