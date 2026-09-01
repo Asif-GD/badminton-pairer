@@ -65,7 +65,7 @@ async def register_players(players_list_request: RegisterPlayersRequest,
         new_user_session.model_dump(by_alias=True, exclude={"id"})
     )
 
-    registered_players = ", ".join(players_list_request.players)
+    registered_players = ", ".join(players_list_request.players)  # -> converts list[str] to str
 
     response = RegisterPlayersResponse(
         id=str(result.inserted_id),
