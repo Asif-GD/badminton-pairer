@@ -49,11 +49,11 @@ async def register_players(players_list_request: RegisterPlayersRequest,
     :param user_sessions:
     :return:
     """
-
-    session_id = create_session_id(username="place_holder", player_list=players_list_request.players)
+    username = f"place_holder_{len(players_list_request.players)}"
+    session_id = create_session_id(username=username, player_list=players_list_request.players)
 
     new_user_session = UserSession(
-        username=f"place_holder_{len(players_list_request.players)}",  # -> discord username goes here
+        username=username,
         session_id=session_id,
         no_of_players=len(players_list_request.players),
         players=players_list_request.players,
