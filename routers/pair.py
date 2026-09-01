@@ -88,11 +88,11 @@ async def shuffle_players(user_sessions: user_sessions_dependency):
     :return:
     """
 
-    # I plan to retrieve the player list using the username which we would get via the Discord bot.
+    # I plan to retrieve the player list using the username
     # for now, a user can have at most one registered set of players i.e. one record of players.
-    discord_username = FIVE_PLAYERS
+    username = FIVE_PLAYERS
     filter_query = {
-        "username": discord_username
+        "username": username
     }
     # fields to include, '_id' is always included by default (can't combine include & exclude, except for '_id')
     projection = {
@@ -119,7 +119,7 @@ async def shuffle_players(user_sessions: user_sessions_dependency):
     if doc is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No session found for user '{discord_username}'"
+            detail=f"No session found for user '{username}'"
         )
 
     db_player_count = doc["no_of_players"]
@@ -170,11 +170,11 @@ async def handle_5_9_10_or_11_player_pairings(players: list[str], benched_player
 
     pairings, benched_players = pair_5_9_10_or_11_players(player_list=players, benched_player_list=benched_players)
 
-    # I plan to retrieve the player list using the username which we would get via the Discord bot.
+    # I plan to retrieve the player list using the username
     # for now, a user can have at most one registered set of players i.e. one record of players.
-    discord_username = FIVE_PLAYERS
+    username = FIVE_PLAYERS
     filter_query = {
-        "username": discord_username
+        "username": username
     }
 
     fields_to_update = {
@@ -216,11 +216,11 @@ async def handle_7_player_pairings(players: list[str], lucky_players: list[str],
     pairings, lucky_players, seventh_player = pair_7_players(player_list=players, lucky_player_list=lucky_players,
                                                              seventh_player=seventh_player)
 
-    # I plan to retrieve the player list using the username which we would get via the Discord bot.
+    # I plan to retrieve the player list using the username
     # for now, a user can have at most one registered set of players i.e. one record of players.
-    discord_username = SEVEN_PLAYERS
+    username = SEVEN_PLAYERS
     filter_query = {
-        "username": discord_username
+        "username": username
     }
 
     fields_to_update = {
