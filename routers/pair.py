@@ -149,7 +149,12 @@ async def handle_4_6_or_8_player_pairings(players: list[str]) -> PairingsRespons
     :return:
     """
     pairings = pair_4_6_or_8_players(player_list=players)
-    return PairingsResponse(teams=pairings)
+
+    response = PairingsResponse(
+        teams=pairings
+    )
+
+    return response
 
 
 async def handle_5_9_10_or_11_player_pairings(players: list[str], benched_players: list[str],
@@ -189,7 +194,12 @@ async def handle_5_9_10_or_11_player_pairings(players: list[str], benched_player
     benched_players = benched_players[- no_of_players_to_be_benched:]
     benched_players: str = ", ".join(benched_players)  # converts the list[str] to str
 
-    return PairingsWithBenchedPlayerResponse(teams=pairings, benched_player=benched_players)
+    response = PairingsWithBenchedPlayerResponse(
+        teams=pairings,
+        benched_player=benched_players
+    )
+
+    return response
 
 
 async def handle_7_player_pairings(players: list[str], lucky_players: list[str], seventh_player: str,
@@ -226,7 +236,11 @@ async def handle_7_player_pairings(players: list[str], lucky_players: list[str],
         },
     )
 
-    return PairingsResponse(teams=pairings)
+    response = PairingsResponse(
+        teams=pairings
+    )
+
+    return response
 
 
 async def handle_12_player_pairings(players: list[str]) -> PairingsResponse:
@@ -236,4 +250,9 @@ async def handle_12_player_pairings(players: list[str]) -> PairingsResponse:
     :return:
     """
     pairings = pair_12_players(player_list=players)
-    return PairingsResponse(teams=pairings)
+
+    response = PairingsResponse(
+        teams=pairings
+    )
+
+    return response
