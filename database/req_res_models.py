@@ -1,7 +1,8 @@
 """
 These models serve as a blueprint of the Requests and Responses.
 """
-from pydantic import BaseModel, ConfigDict, field_validator
+
+from pydantic import BaseModel, ConfigDict, field_validator, Field
 
 
 class RegisterPlayersRequest(BaseModel):
@@ -36,6 +37,22 @@ class RegisterPlayersRequest(BaseModel):
                 raise ValueError(f"Name '{name}' must be at least 3 characters long.")
 
         return v
+
+
+class RegisterPlayersResponse(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        json_schema_extra={
+            "example": {
+                "_id": "random_string",
+                "players": "Alex, Bob, Chris, Dylan",
+                "status": "Players registered successfully.",
+            }
+        }
+    )
+    id: str = Field(alias="_id")
+    players: str
+    status: str
 
 
 class PairingsResponse(BaseModel):
