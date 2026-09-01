@@ -3,7 +3,11 @@ Models serve as a blueprint of the table in the database.
 """
 from typing import Annotated
 
+from fastapi import Depends
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
+from pymongo.asynchronous.collection import AsyncCollection
+
+from database.database import db_dependency
 
 # PyObjectId — bridges MongoDB's ObjectId and Pydantic/JSON's str
 """
@@ -55,3 +59,10 @@ class UserSession(BaseModel):
     lucky_players: list[str] = Field(default_factory=list)
 
     seventh_player: str | None = None  # optional, single value -- only one seventh player every rotation
+
+
+def get_user_sessions_collection(db: db_dependency) -> AsyncCollection:
+    return db.get_collection("user_sessions")
+
+
+user_sessions_dependency = Annotated[AsyncCollection, Depends(get_user_sessions_collection)]

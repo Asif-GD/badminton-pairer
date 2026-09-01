@@ -3,8 +3,7 @@ from typing import Final
 from fastapi import APIRouter, HTTPException
 from starlette import status
 
-from database.database import db_dependency
-from database.models import UserSession
+from database.models import UserSession, user_sessions_dependency
 from database.req_res_models import RegisterPlayersRequest, PairingsResponse, PairingsWithBenchedPlayerResponse
 from pair_players import *
 
@@ -40,15 +39,14 @@ def create_session_id(username: str, player_list: list[str]) -> str:
     response_description="Register players",
     status_code=status.HTTP_201_CREATED
 )
-async def register_players(players_list_request: RegisterPlayersRequest, db: db_dependency):
+async def register_players(players_list_request: RegisterPlayersRequest,
+                           user_sessions: user_sessions_dependency):
     """
         Creates a record of the players under the user in the UserSession Collection.
     :param players_list_request:
-    :param db:
+    :param user_sessions:
     :return:
     """
-
-    user_session_collection = db.get_collection("user_sessions")
 
     session_id = create_session_id(username="place_holder", player_list=players_list_request.players)
 
@@ -61,7 +59,7 @@ async def register_players(players_list_request: RegisterPlayersRequest, db: db_
 
     # model_dump() converts the Pydantic model instance to a plain dict
     # insert_one() requires a dict/Mapping, not a model instance
-    result = await user_session_collection.insert_one(
+    result = await user_sessions.insert_one(
         new_user_session.model_dump(by_alias=True, exclude={"id"})
     )
 
@@ -77,14 +75,12 @@ async def register_players(players_list_request: RegisterPlayersRequest, db: db_
     response_description="Shuffles players and pairs them.",
     status_code=status.HTTP_200_OK
 )
-async def shuffle_players(db: db_dependency):
+async def shuffle_players(user_sessions: user_sessions_dependency):
     """
         Shuffles players and pairs them into teams and returns it to user.
-    :param db:
+    :param user_sessions:
     :return:
     """
-
-    user_session_collection = db.get_collection("user_sessions")
 
     # I plan to retrieve the player list using the username which we would get via the Discord bot.
     # for now, a user can have at most one registered set of players i.e. one record of players.
@@ -112,7 +108,7 @@ async def shuffle_players(db: db_dependency):
             "seventh_player": str
         }
     """
-    doc = await user_session_collection.find_one(filter_query, projection)
+    doc = await user_sessions.find_one(filter_query, projection)
 
     if doc is None:
         raise HTTPException(
@@ -130,10 +126,10 @@ async def shuffle_players(db: db_dependency):
         return await handle_4_6_or_8_player_pairings(players=db_players)
     elif db_player_count == 5 or db_player_count == 9 or db_player_count == 10 or db_player_count == 11:
         return await handle_5_9_10_or_11_player_pairings(players=db_players, benched_players=db_benched_players,
-                                                         db=db)
+                                                         user_sessions=user_sessions)
     elif db_player_count == 7:
         return await handle_7_player_pairings(players=db_players, lucky_players=db_lucky_players,
-                                              seventh_player=db_seventh_player, db=db)
+                                              seventh_player=db_seventh_player, user_sessions=user_sessions)
     elif db_player_count == 12:
         return await handle_12_player_pairings(players=db_players)
     else:
@@ -151,18 +147,17 @@ async def handle_4_6_or_8_player_pairings(players: list[str]) -> PairingsRespons
 
 
 async def handle_5_9_10_or_11_player_pairings(players: list[str], benched_players: list[str],
-                                              db: db_dependency) -> PairingsWithBenchedPlayerResponse:
+                                              user_sessions: user_sessions_dependency) \
+        -> PairingsWithBenchedPlayerResponse:
     """
         Wraps the handle_5_9_10_or_11_player_pairings() into the PairingsWithBenchedPlayerResponse model. Also updates db.
-    :param db:
+    :param user_sessions:
     :param benched_players:
     :param players:
     :return:
     """
 
     pairings, benched_players = pair_5_9_10_or_11_players(player_list=players, benched_player_list=benched_players)
-
-    user_session_collection = db.get_collection("user_sessions")
 
     # I plan to retrieve the player list using the username which we would get via the Discord bot.
     # for now, a user can have at most one registered set of players i.e. one record of players.
@@ -176,7 +171,7 @@ async def handle_5_9_10_or_11_player_pairings(players: list[str], benched_player
     }
 
     # update_one() because a user can have at most one registered set of players i.e. one record of players.
-    result = await user_session_collection.update_one(
+    result = await user_sessions.update_one(
         filter_query,
         update={
             "$set": fields_to_update
@@ -192,20 +187,18 @@ async def handle_5_9_10_or_11_player_pairings(players: list[str], benched_player
 
 
 async def handle_7_player_pairings(players: list[str], lucky_players: list[str], seventh_player: str,
-                                   db: db_dependency) -> PairingsResponse:
+                                   user_sessions: user_sessions_dependency) -> PairingsResponse:
     """
         Wraps the pair_7_players() into the PairingsResponse model. Also updates db.
+    :param user_sessions:
     :param players:
     :param lucky_players:
     :param seventh_player:
-    :param db:
     :return:
     """
 
     pairings, lucky_players, seventh_player = pair_7_players(player_list=players, lucky_player_list=lucky_players,
                                                              seventh_player=seventh_player)
-
-    user_session_collection = db.get_collection("user_sessions")
 
     # I plan to retrieve the player list using the username which we would get via the Discord bot.
     # for now, a user can have at most one registered set of players i.e. one record of players.
@@ -220,7 +213,7 @@ async def handle_7_player_pairings(players: list[str], lucky_players: list[str],
     }
 
     # update_one() because a user can have at most one registered set of players i.e. one record of players.
-    result = await user_session_collection.update_one(
+    result = await user_sessions.update_one(
         filter_query,
         update={
             "$set": fields_to_update
