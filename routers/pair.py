@@ -41,22 +41,22 @@ def create_session_id(username: str, player_list: list[str]) -> str:
     response_description="Register players",
     status_code=status.HTTP_201_CREATED
 )
-async def register_players(players_list_request: NewPlayersRequest,
+async def register_players(new_players: NewPlayersRequest,
                            user_sessions: user_sessions_dependency) -> NewPlayersResponse:
     """
         Creates a record of the players under the user in the UserSession Collection.
-    :param players_list_request:
+    :param new_players:
     :param user_sessions:
     :return:
     """
-    username = f"place_holder_{len(players_list_request.players)}"
-    session_id = create_session_id(username=username, player_list=players_list_request.players)
+    username = f"place_holder_{len(new_players.players)}"
+    session_id = create_session_id(username=username, player_list=new_players.players)
 
     new_user_session = UserSession(
         username=username,
         session_id=session_id,
-        no_of_players=len(players_list_request.players),
-        players=players_list_request.players,
+        no_of_players=len(new_players.players),
+        players=new_players.players,
     )
 
     # model_dump() converts the Pydantic model instance to a plain dict
@@ -65,7 +65,7 @@ async def register_players(players_list_request: NewPlayersRequest,
         new_user_session.model_dump(by_alias=True, exclude={"id"})
     )
 
-    registered_players = ", ".join(players_list_request.players)  # -> converts list[str] to str
+    registered_players = ", ".join(new_players.players)  # -> converts list[str] to str
 
     response = NewPlayersResponse(
         id=str(result.inserted_id),

@@ -77,12 +77,12 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
     response_description="Edits the registered players under user.",
     status_code=status.HTTP_200_OK
 )
-async def update_players(request: NewPlayersRequest, user_sessions: user_sessions_dependency) \
+async def update_players(new_players: NewPlayersRequest, user_sessions: user_sessions_dependency) \
         -> ListPlayersResponse:
     """
         Edits the registered players under user.
-    :param request:
-    :param user_sessions: 
+    :param new_players:
+    :param user_sessions:
     :return:
     """
     username = FOUR_PLAYERS
@@ -90,7 +90,7 @@ async def update_players(request: NewPlayersRequest, user_sessions: user_session
         "username": username
     }
     fields_to_update = {
-        "players": request.players
+        "players": new_players.players
     }
 
     doc = await user_sessions.find_one_and_update(
