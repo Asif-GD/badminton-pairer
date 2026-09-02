@@ -1,10 +1,11 @@
 from typing import Final
 
 from fastapi import APIRouter, HTTPException
+from pymongo.asynchronous.collection import ReturnDocument
 from starlette import status
 
 from database.models import user_sessions_dependency
-from database.req_res_models import ListPlayersResponse
+from database.req_res_models import ListPlayersResponse, NewPlayersRequest
 
 user_router = APIRouter(
     prefix="/user",
@@ -70,5 +71,50 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
 
     return response
 
-# update players
+
+@user_router.patch(
+    "/update",
+    response_description="Edits the registered players under user.",
+    status_code=status.HTTP_200_OK
+)
+async def update_players(request: NewPlayersRequest, user_sessions: user_sessions_dependency) \
+        -> ListPlayersResponse:
+    """
+        Edits the registered players under user.
+    :param request:
+    :param user_sessions: 
+    :return:
+    """
+    username = FOUR_PLAYERS
+    filter_query = {
+        "username": username
+    }
+    fields_to_update = {
+        "players": request.players
+    }
+
+    doc = await user_sessions.find_one_and_update(
+        filter_query,
+        update={
+            "$set": fields_to_update
+        },
+        return_document=ReturnDocument.AFTER,  # return document after update.
+    )
+
+    if doc is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="User session not found. Please register.")
+
+    db_username = doc["username"]
+    db_no_of_players = doc["no_of_players"]
+    db_players = doc["players"]
+    db_players = ", ".join(db_players)  # convert list[str] -> str
+
+    response = ListPlayersResponse(
+        username=db_username,
+        no_of_players=db_no_of_players,
+        players=db_players
+    )
+
+    return response
 # delete
