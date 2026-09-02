@@ -4,8 +4,8 @@ from fastapi import APIRouter, HTTPException
 from starlette import status
 
 from database.models import UserSession, user_sessions_dependency
-from database.req_res_models import RegisterPlayersRequest, PairingsResponse, PairingsWithBenchedPlayerResponse, \
-    RegisterPlayersResponse
+from database.req_res_models import NewPlayersRequest, PairingsResponse, PairingsWithBenchedPlayerResponse, \
+    NewPlayersResponse
 from pair_players import *
 
 pair_router = APIRouter(
@@ -37,12 +37,12 @@ def create_session_id(username: str, player_list: list[str]) -> str:
 
 @pair_router.post(
     "/register",
-    response_model=RegisterPlayersResponse,
+    response_model=NewPlayersResponse,
     response_description="Register players",
     status_code=status.HTTP_201_CREATED
 )
-async def register_players(players_list_request: RegisterPlayersRequest,
-                           user_sessions: user_sessions_dependency) -> RegisterPlayersResponse:
+async def register_players(players_list_request: NewPlayersRequest,
+                           user_sessions: user_sessions_dependency) -> NewPlayersResponse:
     """
         Creates a record of the players under the user in the UserSession Collection.
     :param players_list_request:
@@ -67,7 +67,7 @@ async def register_players(players_list_request: RegisterPlayersRequest,
 
     registered_players = ", ".join(players_list_request.players)  # -> converts list[str] to str
 
-    response = RegisterPlayersResponse(
+    response = NewPlayersResponse(
         id=str(result.inserted_id),
         players=registered_players,
         status="Players registered successfully."

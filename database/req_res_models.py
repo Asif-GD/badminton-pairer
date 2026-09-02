@@ -5,7 +5,7 @@ These models serve as a blueprint of the Requests and Responses.
 from pydantic import BaseModel, ConfigDict, field_validator, Field
 
 
-class RegisterPlayersRequest(BaseModel):
+class NewPlayersRequest(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
@@ -39,7 +39,7 @@ class RegisterPlayersRequest(BaseModel):
         return v
 
 
-class RegisterPlayersResponse(BaseModel):
+class NewPlayersResponse(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
         json_schema_extra={
