@@ -103,7 +103,7 @@ async def update_players(new_players: NewPlayersRequest, user_sessions: user_ses
 
     if doc is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="User session not found. Please register.")
+                            detail=f"No session found for user '{username}'. Please register.")
 
     db_username = doc["username"]
     db_no_of_players = doc["no_of_players"]

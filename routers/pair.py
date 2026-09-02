@@ -119,7 +119,7 @@ async def shuffle_players(user_sessions: user_sessions_dependency):
     if doc is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No session found for user '{username}'"
+            detail=f"No session found for user '{username}'. Please register."
         )
 
     db_player_count = doc["no_of_players"]
