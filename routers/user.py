@@ -81,16 +81,24 @@ async def update_players(new_players: NewPlayersRequest, user_sessions: user_ses
         -> ListPlayersResponse:
     """
         Edits the registered players under user.
-    :param new_players:
-    :param user_sessions:
-    :return:
+    :param new_players: Incoming request body containing the new list of players.
+    :param user_sessions: Injected user_sessions collection dependency.
+    :return: The updated players list for the user.
+    :raises HTTPException 404: If no session exists for user.
     """
+    # TODO: hardcoded for now -- will come from the discord bot.
     username = FOUR_PLAYERS
     filter_query = {
         "username": username
     }
     fields_to_update = {
-        "players": new_players.players
+        "players": new_players.players,
+        "no_of_players": len(new_players.players),
+        # Resetting benched/lucky/seventh player on update,
+        # since a new player list invalidates any previous rotation assignment.
+        "benched_players": [],
+        "lucky_players": [],
+        "seventh_player": None
     }
 
     doc = await user_sessions.find_one_and_update(
@@ -108,12 +116,12 @@ async def update_players(new_players: NewPlayersRequest, user_sessions: user_ses
     db_username = doc["username"]
     db_no_of_players = doc["no_of_players"]
     db_players = doc["players"]
-    db_players = ", ".join(db_players)  # convert list[str] -> str
+    players_display = ", ".join(db_players)  # convert list[str] -> str, kept as separate name.
 
     response = ListPlayersResponse(
         username=db_username,
         no_of_players=db_no_of_players,
-        players=db_players
+        players=players_display
     )
 
     return response
