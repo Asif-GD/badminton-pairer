@@ -190,11 +190,11 @@ async def handle_5_9_10_or_11_player_pairings(players: list[str], benched_player
     # we only return the players benched this turn and not the entire list
     no_of_players_to_be_benched = len(players) % 4
     benched_players = benched_players[- no_of_players_to_be_benched:]
-    benched_players: str = ", ".join(benched_players)  # converts the list[str] to str
+    players_display: str = ", ".join(benched_players)  # converts the list[str] to str
 
     response = PairingsWithBenchedPlayerResponse(
         teams=pairings,
-        benched_player=benched_players
+        benched_player=players_display
     )
 
     return response
