@@ -49,6 +49,7 @@ async def register_players(new_players: NewPlayersRequest,
     :param user_sessions:
     :return:
     """
+    # TODO: hardcoded for now -- will come from the discord bot.
     username = f"place_holder_{len(new_players.players)}"
     session_id = create_session_id(username=username, player_list=new_players.players)
 
@@ -88,8 +89,7 @@ async def shuffle_players(user_sessions: user_sessions_dependency):
     :return:
     """
 
-    # I plan to retrieve the player list using the username
-    # for now, a user can have at most one registered set of players i.e. one record of players.
+    # TODO: hardcoded for now -- will come from the discord bot.
     username = FIVE_PLAYERS
     filter_query = {
         "username": username
@@ -170,13 +170,11 @@ async def handle_5_9_10_or_11_player_pairings(players: list[str], benched_player
 
     pairings, benched_players = pair_5_9_10_or_11_players(player_list=players, benched_player_list=benched_players)
 
-    # I plan to retrieve the player list using the username
-    # for now, a user can have at most one registered set of players i.e. one record of players.
+    # TODO: hardcoded for now -- will come from the discord bot.
     username = FIVE_PLAYERS
     filter_query = {
         "username": username
     }
-
     fields_to_update = {
         "benched_players": benched_players
     }
@@ -216,13 +214,11 @@ async def handle_7_player_pairings(players: list[str], lucky_players: list[str],
     pairings, lucky_players, seventh_player = pair_7_players(player_list=players, lucky_player_list=lucky_players,
                                                              seventh_player=seventh_player)
 
-    # I plan to retrieve the player list using the username
-    # for now, a user can have at most one registered set of players i.e. one record of players.
+    # TODO: hardcoded for now -- will come from the discord bot.
     username = SEVEN_PLAYERS
     filter_query = {
         "username": username
     }
-
     fields_to_update = {
         "lucky_players": lucky_players,
         "seventh_player": seventh_player
