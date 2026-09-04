@@ -13,8 +13,8 @@ class NewPlayersRequest(BaseModel):
             }
         }
     )
-
-    players: list[str]  # list of names entered by the user, one per line in the Discord modal
+    # list of names entered by the user, one per line in the Discord modal.
+    players: list[str]  # (bot strips leading/trailing whitespace per name before this reaches the API)
 
     @field_validator("players")
     @classmethod
@@ -22,6 +22,15 @@ class NewPlayersRequest(BaseModel):
         # rejects an empty list -- if user submits with no names, or blank lines
         if not v:
             raise ValueError("Players field cannot be empty.")
+
+        # only supports 4 - 12 players for now.
+        if not (4 <= len(v) <= 12):
+            raise ValueError(f"Only 4 to 12 players are supported. (got {len(v)}).")
+
+        # rejects case-insensitive duplicate names -- "Alex" and "alex" are treated as same player.
+        typed_names = {name.lower() for name in v}  # -> set() doesn't support duplicate values.
+        if len(typed_names) != len(v):
+            raise ValueError("Players names must be unique (case-insensitive).")
 
         for name in v:
             # rejects any name containing whitespace -- error message tells the user exactly what format is expected
