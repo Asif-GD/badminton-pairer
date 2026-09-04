@@ -33,16 +33,15 @@ TWELVE_PLAYERS: Final[str] = "place_holder_12"
 async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersResponse:
     """
         Lists players registered under the user.
-    :param user_sessions:
-    :return:
+    :param user_sessions: Injected user_sessions collections dependency.
+    :return: The list of players registered under the user.
+    :raises HTTPException 404: If no session exists for user.
     """
-
+    # TODO: hardcoded for now -- will come from the discord bot.
     username = FOUR_PLAYERS
-
     filter_query = {
         "username": username
     }
-
     projection = {
         "username": 1,
         "no_of_players": 1,
