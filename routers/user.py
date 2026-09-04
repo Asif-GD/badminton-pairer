@@ -60,12 +60,12 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
     db_username = doc["username"]
     db_no_of_players = doc["no_of_players"]
     db_players = doc["players"]
-    db_players = ", ".join(db_players)  # -> converts list[str] to str
+    players_display = ", ".join(db_players)  # -> converts list[str] to str
 
     response = ListPlayersResponse(
         username=db_username,
         no_of_players=db_no_of_players,
-        players=db_players
+        players=players_display
     )
 
     return response
