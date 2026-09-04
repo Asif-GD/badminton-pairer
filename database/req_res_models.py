@@ -1,8 +1,12 @@
 """
 These models serve as a blueprint of the Requests and Responses.
 """
+from typing import Final
 
 from pydantic import BaseModel, ConfigDict, field_validator, Field
+
+MIN_PLAYER_COUNT: Final[int] = 4
+MAX_PLAYER_COUNT: Final[int] = 12
 
 
 class NewPlayersRequest(BaseModel):
@@ -24,8 +28,9 @@ class NewPlayersRequest(BaseModel):
             raise ValueError("Players field cannot be empty.")
 
         # only supports 4 - 12 players for now.
-        if not (4 <= len(v) <= 12):
-            raise ValueError(f"Only 4 to 12 players are supported. (got {len(v)}).")
+        if not (MIN_PLAYER_COUNT <= len(v) <= MAX_PLAYER_COUNT):
+            raise ValueError(f"Only {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT} players are supported. "
+                             f"(got {len(v)}).")
 
         # rejects case-insensitive duplicate names -- "Alex" and "alex" are treated as same player.
         typed_names = {name.lower() for name in v}  # -> set() doesn't support duplicate values.
