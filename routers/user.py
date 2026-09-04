@@ -2,6 +2,7 @@ from typing import Final
 
 from fastapi import APIRouter, HTTPException
 from pymongo.asynchronous.collection import ReturnDocument
+from pymongo.results import DeleteResult
 from starlette import status
 
 from database.models import user_sessions_dependency
@@ -124,4 +125,35 @@ async def update_players(new_players: NewPlayersRequest, user_sessions: user_ses
     )
 
     return response
-# delete
+
+
+@user_router.delete(
+    "/delete",
+    response_description="Deletes the user session.",
+    status_code=status.HTTP_200_OK
+)
+async def delete_user(user_sessions: user_sessions_dependency):
+    """
+        Deletes the user session.
+    :param user_sessions: Injected user_sessions collection dependency.
+    :return: A dict with a confirmation message.
+    :raises HTTPException 404: If no session exists for user.
+    """
+    # TODO: hardcoded for now -- will come from the discord bot.
+    username = FOUR_PLAYERS
+    filter_query = {
+        "username": username
+    }
+
+    # removes the first document matching the filter.
+    result: DeleteResult = await user_sessions.delete_one(filter_query)
+
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"No session found for user '{username}'.")
+
+    response = {
+        "message": f"User {username} session has been deleted."
+    }
+
+    return response
