@@ -24,7 +24,7 @@ ALGORITHM:
         - pair and play against all teams before shuffle.
         - a total of 6 games before re-pairing.
     - 9 to 11 (preferably two courts)
-        - 3 players benched
+        - 1, 2, and 3 players are benched respectively.
     - 12 (preferably two courts)
         - 6 pairs, similar to a 6-player shuffle.
         - the pairs are separated into two brackets.
@@ -37,8 +37,9 @@ XX 1. A method to count the number of players and call the pairer method accordi
     - initially, the method will take the players' names as a list
     - this idea is scraped.
 
-2. The number of players will be specified in the incoming request.
+XX 2. The number of players will be specified in the incoming request. XX
     - the appropriate method is chosen accordingly.
+    - this idea is scraped.
 
 3. Pairs generated are returned as dict() to help with JSON conversions.
 
@@ -48,3 +49,14 @@ XX 1. A method to count the number of players and call the pairer method accordi
     - I tried using MutableList, but that brought its own set of challenges.
     - I could try using 1dim-array in PostgreSQL.
     - In any case, I do not require any relational mapping, ACID transactions or complex joins in my db. So, switching to MongoDB seems wise.
+
+5. Split the functionality into two routes
+    - pair router "/pair"
+        - "/register" -> user registers his players before they can be paired.
+        - "/shuffle" -> pairs the players in random manner.
+    - user router "/user"
+        - "/list" -> lists the players registered under the user.
+        - "/remove_player" -> removes a player from the list of registered players under the user.
+        - "/add_player" -> adds a player from the list of registered players under the user.
+        - "/update" -> updates the players registered under the user. (multiple add / removes)
+        - "/delete" -> deletes the user session.
