@@ -1,12 +1,13 @@
-from typing import Final
+from typing import Final, Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pymongo.asynchronous.collection import ReturnDocument
-from pymongo.results import DeleteResult, UpdateResult
+from pymongo.results import DeleteResult
 from starlette import status
 
 from database.models import user_sessions_dependency
 from database.req_res_models import ListPlayersResponse, NewPlayersRequest, MAX_PLAYER_COUNT, MIN_PLAYER_COUNT
+from validators import validate_player_name
 
 user_router = APIRouter(
     prefix="/user",
@@ -23,6 +24,21 @@ NINE_PLAYERS: Final[str] = "place_holder_9"
 TEN_PLAYERS: Final[str] = "place_holder_10"
 ELEVEN_PLAYERS: Final[str] = "place_holder_11"
 TWELVE_PLAYERS: Final[str] = "place_holder_12"
+
+
+# - a thin wrapper to translate validate_player_name ValueError into HTTPException.
+# - this keeps the validate_player_name reusable/testable outside a request context.
+def get_validated_player_name(name: str) -> str:
+    """
+        Translates validate_player_name ValueError into HTTPException
+    """
+    try:
+        return validate_player_name(name)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))
+
+
+name_validator_dependency = Annotated[str, Depends(get_validated_player_name)]
 
 
 @user_router.get(
@@ -73,11 +89,12 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
 
 
 @user_router.patch(
-    "/add_player/{player_name}",
+    "/add_player/{name}",
     response_description="Adds a player to the list of registered players under the user.",
     status_code=status.HTTP_200_OK
 )
-async def add_player(name: str, user_sessions: user_sessions_dependency) -> ListPlayersResponse:
+async def add_player(name: name_validator_dependency, user_sessions: user_sessions_dependency) \
+        -> ListPlayersResponse:
     """
         Adds a player to the list of registered players under the user.
     :param name: Incoming path parameter that holds the player's name to be added.
@@ -87,9 +104,7 @@ async def add_player(name: str, user_sessions: user_sessions_dependency) -> List
     :raises HTTPException 400: If player already registered under user, or user has maximum number of players registered.
     """
     # TODO: hardcoded for now -- will come from the discord bot.
-    username: str = FIVE_PLAYERS
-    # TODO: set path parameter validation and handle this there
-    name = name.capitalize()
+    username: str = NINE_PLAYERS
 
     """
         filter_query -> find user session of 'username' where 'name' isn't already registered under user 
