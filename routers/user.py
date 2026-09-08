@@ -101,7 +101,8 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
     :param user_sessions: Injected user_sessions collections dependency
     :return: The updated players list for the user.
     :raises HTTPException 404: If no session exists for user.
-    :raises HTTPException 400: If player already registered under user, or user has maximum number of players registered.
+    :raises HTTPException 400: If player already registered under user,
+        or user has maximum number of players registered.
     """
     # TODO: hardcoded for now -- will come from the discord bot.
     username: str = NINE_PLAYERS
@@ -156,7 +157,7 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
         doc could be None for multiple reasons
             - 1. username wasn't found
             - 2. player already registered under user
-            - 3. user has max number of players registered.
+            - 3. user has maximum number of players registered.
     """
     if doc is None:
         existing_user_doc = await user_sessions.find_one({"username": username})
@@ -180,6 +181,7 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Cannot add new player. User has {existing_user_doc['no_of_players']} players registered. "
                    f"Number of players allowed per user: {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT}."
+                   f"Please remove another player first."
         )
 
     db_username = doc["username"]
