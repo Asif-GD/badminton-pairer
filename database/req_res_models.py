@@ -5,6 +5,8 @@ from typing import Final
 
 from pydantic import BaseModel, ConfigDict, field_validator, Field
 
+from validators import validate_player_name
+
 MIN_PLAYER_COUNT: Final[int] = 4
 MAX_PLAYER_COUNT: Final[int] = 12
 
@@ -32,25 +34,14 @@ class NewPlayersRequest(BaseModel):
             raise ValueError(f"Only {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT} players are supported. "
                              f"(got {len(v)}).")
 
-        # rejects case-insensitive duplicate names -- "Alex" and "alex" are treated as same player.
-        typed_names = {name.lower() for name in v}  # -> set() doesn't support duplicate values.
-        if len(typed_names) != len(v):
+        # checks for all per-name rules (length, whitespace, allowed characters, capitalization)
+        normalized_names = [validate_player_name(name) for name in v]
+
+        # rejects case-insensitive duplicate names
+        if len(set(normalized_names)) != len(normalized_names):  # -> set() doesn't support duplicate values.
             raise ValueError("Players names must be unique (case-insensitive).")
 
-        for name in v:
-            # rejects any name containing whitespace -- error message tells the user exactly what format is expected
-            # instead of just saying "no whitespace", so they know how to fix it
-            if any(ch.isspace() for ch in name):
-                raise ValueError(
-                    f"Name '{name}' must not contain any whitespace. Please use a player's first name or "
-                    f"use the format of 'first-name'_'last-name'."
-                )
-
-            # enforces a minimum length so single-character or two-character junk entries are rejected
-            if len(name) < 3:
-                raise ValueError(f"Name '{name}' must be at least 3 characters long.")
-
-        return v
+        return normalized_names
 
 
 class NewPlayersResponse(BaseModel):
