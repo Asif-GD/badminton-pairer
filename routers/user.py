@@ -204,7 +204,7 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
 async def update_players(new_players: NewPlayersRequest, user_sessions: user_sessions_dependency) \
         -> ListPlayersResponse:
     """
-        Edits the registered players under user.
+        Edits the entire list of registered players under user.
     :param new_players: Incoming request body containing the new list of players.
     :param user_sessions: Injected user_sessions collection dependency.
     :return: The updated players list for the user.
