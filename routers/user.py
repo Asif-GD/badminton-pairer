@@ -199,7 +199,7 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
 
 
 @user_router.patch(
-    "/remove/{name}",
+    "/remove_player/{name}",
     response_description="Removes a player from the list of registered players under the user.",
     status_code=status.HTTP_200_OK
 )
@@ -225,7 +225,7 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
         "username": username,
         "players": name,  # checks if 'name' is in the players[] list in db
         "$expr": {
-            "$gt": [{"$size": "$players"}, MIN_PLAYER_COUNT]
+            "$gt": [{"$size": "$players"}, MIN_PLAYER_COUNT]  # number of players cannot go below MIN_PLAYER_COUNT
         }
     }
 
