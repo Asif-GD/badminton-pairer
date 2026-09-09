@@ -35,7 +35,7 @@ def validate_player_name(name: str) -> str:
             f"underscore separator (e.g. 'firstname_lastname') are allowed."
         )
 
-    return name.capitalize()
+    # in case user entered john_doe -> John_Doe, alex -> Alex
+    name = '_'.join(part.capitalize() for part in name.split('_'))
 
-
-
+    return name
