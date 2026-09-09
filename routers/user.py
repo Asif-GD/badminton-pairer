@@ -49,7 +49,7 @@ name_validator_dependency = Annotated[str, Depends(get_validated_player_name)]
 )
 async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersResponse:
     """
-        Lists players registered under the user.
+        Lists the players registered under the user.
     :param user_sessions: Injected user_sessions collections dependency.
     :return: The list of players registered under the user.
     :raises HTTPException 404: If no session exists for user.
@@ -180,7 +180,7 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Cannot add new player. User has {existing_user_doc['no_of_players']} players registered. "
-                   f"Number of players allowed per user: {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT}."
+                   f"Number of players allowed per user: {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT}. "
                    f"Please remove another player first."
         )
 
@@ -231,7 +231,7 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
 
     """
         update_pipeline -> update happens as an aggregate-pipeline update because the 'no_of_players' should
-            reflect the length of 'players' after the player has been added.        
+            reflect the length of 'players' after the player has been removed.        
     """
     update_pipeline: list[dict] = [
         {
@@ -295,7 +295,7 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Cannot remove player. User has {existing_user_doc['no_of_players']} players registered. "
-                   f"Number of players allowed per user: {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT}."
+                   f"Number of players allowed per user: {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT}. "
                    f"Please add another player first."
         )
 
@@ -315,13 +315,13 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
 
 @user_router.patch(
     "/update",
-    response_description="Edits the registered players under user.",
+    response_description="Updates (replaces) the entire list of registered players under user.",
     status_code=status.HTTP_200_OK
 )
 async def update_players(new_players: NewPlayersRequest, user_sessions: user_sessions_dependency) \
         -> ListPlayersResponse:
     """
-        Edits the entire list of registered players under user.
+        Updates (replaces) the entire list of registered players under user.
     :param new_players: Incoming request body containing the new list of players.
     :param user_sessions: Injected user_sessions collection dependency.
     :return: The updated players list for the user.
