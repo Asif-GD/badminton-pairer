@@ -173,7 +173,7 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
         if name in existing_user_doc["players"]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Player already registered under this user. No duplicate entries allowed."
+                detail=f"Player '{name}' already registered under this user. No duplicate entries allowed."
             )
 
         # if neither 1 and 2, user has maximum players registered already.
