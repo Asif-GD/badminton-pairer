@@ -53,8 +53,8 @@ XX 2. The number of players will be specified in the incoming request. XX
 5. Split the functionality into two routes
     - pair router "/pair"
         - "/register" -> user registers his players before they can be paired.
-        - "/shuffle" -> pairs the players registered under the user, randomly. (User session maintained)
-        - "/split" -> pairs the players given by the user, randomly. (No user session maintained)
+        - "/shuffle" -> shuffle the players in pairs of two registered under the user, randomly. (User session maintained)
+        - "/split" -> split the players in pairs of two given by the user, randomly. (No user session maintained)
     - user router "/user"
         - "/list" -> lists the players registered under the user.
         - "/add_player" -> adds a player to the list of registered players under the user.
