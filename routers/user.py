@@ -71,7 +71,7 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
     if doc is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No user with '{username}' found. Please register."
+            detail=f"No user with username: '{username}' found. Please register."
         )
 
     db_username = doc["username"]
