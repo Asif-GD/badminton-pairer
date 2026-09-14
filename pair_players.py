@@ -12,6 +12,28 @@ def generate_pairs(player_list: list[str]) \
     return pairs
 
 
+def split(player_list: list[str]) \
+        -> tuple[dict[str, str], str | None]:
+    """
+        IMPLEMENTATION: -> No priority. No saved session or tracked.
+            - Players are paired in random order.
+            - If there are odd number of players, one player is chosen at random and remains unpaired.
+    :param player_list:
+    :return: The teams and unpaired player if any.
+    """
+    # random.shuffle + list.pop is cheaper compared to random.choice + list.remove
+    player_list_copy = player_list.copy()
+    random.shuffle(player_list_copy)  # O(n), one pass
+
+    unpaired_player: str | None = None
+    if len(player_list_copy) % 2 == 1:
+        unpaired_player = player_list_copy.pop()  # O(1) from the end
+
+    teams = generate_pairs(player_list_copy)
+
+    return teams, unpaired_player
+
+
 def pair_4_6_or_8_players(player_list: list[str]) \
         -> dict[str, str]:
     """
