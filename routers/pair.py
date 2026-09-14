@@ -4,8 +4,8 @@ from fastapi import APIRouter, HTTPException
 from starlette import status
 
 from database.models import UserSession, user_sessions_dependency
-from database.req_res_models import NewPlayersRequest, PairingsResponse, PairingsWithBenchedPlayerResponse, \
-    NewPlayersResponse
+from database.req_res_models import NewPlayersResponse, NewPlayersRequest, PairingsResponse, \
+    PairingsWithBenchedPlayerResponse, SplitPlayersRequest, SplitPlayersResponse
 from pair_players import *
 
 pair_router = APIRouter(
@@ -249,6 +249,29 @@ async def handle_12_player_pairings(players: list[str]) -> PairingsResponse:
 
     response = PairingsResponse(
         teams=pairings
+    )
+
+    return response
+
+
+@pair_router.post(
+    "/split",
+    response_description="Split the players in pairs of two given by the user, randomly.",
+    status_code=status.HTTP_200_OK
+)
+async def split_players(players: SplitPlayersRequest) -> SplitPlayersResponse:
+    """
+        Split the players in pairs of two given by the user, randomly.
+    :param players:
+    :return: The pairings of players and unpaired player if any.
+    """
+
+    pairings, unpaired_player = split(player_list=players.players)
+
+    response: SplitPlayersResponse = SplitPlayersResponse(
+        no_of_players=len(players.players),
+        teams=pairings,
+        unpaired_player=unpaired_player
     )
 
     return response
