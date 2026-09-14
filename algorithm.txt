@@ -60,4 +60,4 @@ XX 2. The number of players will be specified in the incoming request. XX
         - "/add_player" -> adds a player to the list of registered players under the user.
         - "/remove_player" -> removes a player from the list of registered players under the user.
         - "/update" -> updates (replaces) the list of players registered under the user.
-        - "/delete" -> deletes the user session.
+        - "/delete_user" -> deletes the user session.
