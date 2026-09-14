@@ -18,8 +18,6 @@ def split(player_list: list[str]) \
         IMPLEMENTATION: -> No priority. No saved session or tracked.
             - Players are paired in random order.
             - If there are odd number of players, one player is chosen at random and remains unpaired.
-    :param player_list:
-    :return: The teams and unpaired player if any.
     """
     # random.shuffle + list.pop is cheaper compared to random.choice + list.remove
     player_list_copy = player_list.copy()
