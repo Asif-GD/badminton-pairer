@@ -314,7 +314,7 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
 
 
 @user_router.patch(
-    "/update",
+    "/update_players",
     response_description="Updates (replaces) the entire list of registered players under user.",
     status_code=status.HTTP_200_OK
 )
@@ -325,7 +325,7 @@ async def update_players(new_players: NewPlayersRequest, user_sessions: user_ses
     :param new_players: Incoming request body containing the new list of players.
     :param user_sessions: Injected user_sessions collection dependency.
     :return: The updated players list for the user.
-    :raises HTTPException 404: If no session exists for user.
+    :raises HTTPException 404: If no user record exists.
     """
     # TODO: hardcoded for now -- will come from the discord bot.
     username = FOUR_PLAYERS
@@ -351,8 +351,10 @@ async def update_players(new_players: NewPlayersRequest, user_sessions: user_ses
     )
 
     if doc is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"No session found for user '{username}'. Please register.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No user with username: '{username}' found. Please register."
+        )
 
     db_username = doc["username"]
     db_no_of_players = doc["no_of_players"]
