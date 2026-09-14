@@ -100,7 +100,7 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
     :param name: Incoming path parameter that holds the player's name to be added.
     :param user_sessions: Injected user_sessions collections dependency
     :return: The updated players list for the user.
-    :raises HTTPException 404: If no session exists for user.
+    :raises HTTPException 404: If no user record exists.
     :raises HTTPException 400: If player already registered under user,
         or user has maximum number of players registered.
     """
@@ -166,7 +166,7 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
         if existing_user_doc is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No user with user: '{username}' found. Please register."
+                detail=f"No user with username: '{username}' found. Please register."
             )
 
         # 2. player already registered under user
