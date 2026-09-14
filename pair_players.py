@@ -83,13 +83,16 @@ def pair_5_9_10_or_11_players(player_list: list[str], benched_player_list: list[
         player_to_be_benched = random.choice(player_list_copy)
 
         # to ensure every player gets benched at least once
-        while player_to_be_benched in benched_players:
+        while player_to_be_benched in benched_players:  # reject-sampling
             player_to_be_benched = random.choice(player_list_copy)
 
         benched_players.append(player_to_be_benched)
         player_list_copy.remove(player_to_be_benched)
 
-        # after every player has been benched at least once, the cycle starts over.
+        """
+        - after every player has been benched at least once, the cycle starts over.
+        - caps benched_players below N so the reject-sampling above always has ≥1 candidate
+        """
         if len(player_list) == len(benched_players):  # -> note: we use player_list and not player_list_copy
             benched_players.pop(0)
 
@@ -102,7 +105,7 @@ def pair_5_9_10_or_11_players(player_list: list[str], benched_player_list: list[
     return teams, benched_players
 
 
-def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh_player: str) \
+def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh_player: str | None) \
         -> tuple[dict[str, str], list[str], str]:
     """
         IMPLEMENTATION:
@@ -122,21 +125,20 @@ def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh
     - the very first player in the lucky_players list becomes the lucky player again in this pairing.
     - else, a random player becomes a lucky player
     """
-    if len(lucky_players) == len(player_list):
+    if len(player_list) == len(lucky_players):
         lucky_player_this_pairing = lucky_players.pop(0)
 
     else:
         lucky_player_this_pairing = random.choice(player_list_copy)
 
         # to ensure every player gets to be lucky_player at least once
-        while lucky_player_this_pairing in lucky_player_list:
+        while lucky_player_this_pairing in lucky_players:  # reject-sampling
             lucky_player_this_pairing = random.choice(player_list_copy)
 
     lucky_players.append(lucky_player_this_pairing)
     player_list_copy.remove(lucky_player_this_pairing)
 
-    seventh_player: str = seventh_player
-    if not seventh_player:  # -> usually in case of first pairing
+    if seventh_player is None:  # -> usually in case of first pairing
         seventh_player = random.choice(player_list_copy)
     player_list_copy.remove(seventh_player)
 
@@ -165,9 +167,9 @@ def pair_12_players(player_list: list[str]) \
             - players are paired in random order.
     """
     """
-        - note -> although the core logic is the same as pair_4_6_or_8_players(), 
-            in the future the return response would change based on number of courts available. 
-        - So, keeping it separate for now.
+    - note -> although the core logic is the same as pair_4_6_or_8_players(), 
+        in the future the return response would change based on number of courts available. 
+    - So, keeping it separate for now.
     """
     player_list_copy = player_list.copy()
     random.shuffle(player_list_copy)
