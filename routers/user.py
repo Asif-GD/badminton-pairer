@@ -210,7 +210,7 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
     :param name: Incoming path parameter that holds the player's name to be removed.
     :param user_sessions: Injected user_sessions collections dependency
     :return: The updated players list for the user.
-    :raises HTTPException 404: If no session exists for user.
+    :raises HTTPException 404: If no user record exists.
     :raises HTTPException 400: If player is not found registered under user,
         or user is at minimum number of players registered.
     """
@@ -281,14 +281,14 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
         if existing_user_doc is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No user with user: '{username}' found. Please register."
+                detail=f"No user with username: '{username}' found. Please register."
             )
 
         # 2. player NOT registered under user
         if name not in existing_user_doc["players"]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Player not found registered under user."
+                detail=f"Player '{name}' not found registered under user."
             )
 
         # if neither 1 and 2, user has minimum players registered and no more players can be removed.
