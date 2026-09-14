@@ -3,7 +3,7 @@ These models serve as a blueprint of the Requests and Responses.
 """
 from typing import Final
 
-from pydantic import BaseModel, ConfigDict, field_validator, Field
+from pydantic import BaseModel, ConfigDict, field_validator, Field, computed_field
 
 from validators import validate_player_name
 
@@ -106,3 +106,55 @@ class ListPlayersResponse(BaseModel):
     username: str
     no_of_players: int
     players: str
+
+
+class SplitPlayersRequest(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "players": ['Alex', 'Bob', 'Chris', 'Dylan']
+            }
+        }
+    )
+
+    # list of names entered by the user, one per line in the Discord modal.
+    # (bot strips leading/trailing whitespace per name before this reaches the API)
+    players: list[str] = Field(min_length=3)  # min 3: 1 can't be split, 2 doesn't need this endpoint's help
+
+    @field_validator("players")
+    @classmethod
+    def validate_players(cls, value: list[str]) -> list[str]:
+        # checks for all per-name rules (length, whitespace, allowed characters, capitalization)
+        normalized_names = [validate_player_name(name) for name in value]
+
+        # rejects case-insensitive duplicate names
+        if len(set(normalized_names)) != len(normalized_names):  # -> set() doesn't support duplicate values.
+            raise ValueError("Players names must be unique (case-insensitive).")
+
+        return normalized_names
+
+
+class SplitPlayersResponse(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "no_of_players": 4,
+                "teams": {
+                    "1": "Bob, Dylan",
+                    "2": "Alex, Chris"
+                },
+                "unpaired_player": None,
+                "no_of_teams": 2
+            }
+        }
+    )
+
+    no_of_players: int
+    teams: dict[str, str]
+    unpaired_player: str | None = None
+
+    @computed_field  # marks this as a schema field, even though it's not stored
+    @property
+    def no_of_teams(self) -> int:
+        # always derived -- never set directly, never goes stale
+        return len(self.teams)
