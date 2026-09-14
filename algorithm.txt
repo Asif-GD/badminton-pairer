@@ -56,7 +56,7 @@ XX 2. The number of players will be specified in the incoming request. XX
         - "/shuffle" -> shuffle the players in pairs of two registered under the user, randomly. (User session maintained)
         - "/split" -> split the players in pairs of two given by the user, randomly. (No user session maintained)
     - user router "/user"
-        - "/list" -> lists the players registered under the user.
+        - "/list_players" -> lists the players registered under the user.
         - "/add_player" -> adds a player to the list of registered players under the user.
         - "/remove_player" -> removes a player from the list of registered players under the user.
         - "/update" -> updates (replaces) the list of players registered under the user.

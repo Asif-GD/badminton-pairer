@@ -42,7 +42,7 @@ name_validator_dependency = Annotated[str, Depends(get_validated_player_name)]
 
 
 @user_router.get(
-    "/list",
+    "/list_players",
     response_model=ListPlayersResponse,
     description="Lists the players registered under user.",
     status_code=status.HTTP_200_OK
@@ -52,7 +52,7 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
         Lists the players registered under the user.
     :param user_sessions: Injected user_sessions collections dependency.
     :return: The list of players registered under the user.
-    :raises HTTPException 404: If no session exists for user.
+    :raises HTTPException 404: If no user record exists.
     """
     # TODO: hardcoded for now -- will come from the discord bot.
     username = FOUR_PLAYERS
@@ -71,7 +71,7 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
     if doc is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No session found for user: '{username}'. Please register."
+            detail=f"No user with '{username}' found. Please register."
         )
 
     db_username = doc["username"]
