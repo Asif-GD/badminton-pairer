@@ -26,11 +26,24 @@ TWELVE_PLAYERS: Final[str] = "place_holder_12"
 
 
 def create_session_id(username: str, player_list: list[str]) -> str:
+    """
+        Creates a session_id to be stored as part of the user record in the db.
+        IMPLEMENTATION:
+            - combines the username, and the first 3 characters of all players
+                from the user's list of registered players.
+            - a session_id is unique, so the player_list is always sorted to prevent duplicates.
+
+    :param username: The username of the user registering retrieved using the discord bot.
+    :param player_list: The list of players being registered under user.
+    :return: A string of size N.
+    """
     session_id: str = username
-    player_list.sort()
-    for player in player_list:
-        for index in range(0, 3):
-            session_id += player[index]
+    # sorted independently of the caller,
+    # so session_id stays correct even if a future caller passes an unsorted list.
+    sorted_player_list: list[str] = sorted(player_list)
+
+    for player in sorted_player_list:
+        session_id += player[:3]
 
     return session_id
 
