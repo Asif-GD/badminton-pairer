@@ -1,6 +1,7 @@
 from typing import Final
 
 from fastapi import APIRouter, HTTPException
+from pymongo.errors import DuplicateKeyError
 from starlette import status
 
 from database.models import UserSession, user_sessions_dependency
@@ -51,37 +52,49 @@ def create_session_id(username: str, player_list: list[str]) -> str:
 @pair_router.post(
     "/register",
     response_model=NewPlayersResponse,
-    response_description="Register players",
+    response_description="Create a new user record and registers the players under the user.",
     status_code=status.HTTP_201_CREATED
 )
 async def register_players(new_players: NewPlayersRequest,
                            user_sessions: user_sessions_dependency) -> NewPlayersResponse:
     """
-        Creates a record of the players under the user in the UserSession Collection.
-    :param new_players:
-    :param user_sessions:
-    :return:
+        Creates a new user record with the list of players under the user in the 'user_sessions' Collection.
+
+    :param new_players: Incoming request body containing the new list of players.
+    :param user_sessions: Injected user_sessions collection dependency.
+    :return: A response model of type NewPlayersResponse containing the '_id' from the db, the list of players,
+        and a status message 'Players registered successfully.'.
     """
     # TODO: hardcoded for now -- will come from the discord bot.
-    username = f"place_holder_{len(new_players.players)}"
-    session_id = create_session_id(username=username, player_list=new_players.players)
+    username: str = f"place_holder_{len(new_players.players)}"
+    sorted_player_list: list[str] = sorted(new_players.players)
 
-    new_user_session = UserSession(
+    session_id: str = create_session_id(username=username, player_list=sorted_player_list)
+
+    new_user_session: UserSession = UserSession(
         username=username,
         session_id=session_id,
         no_of_players=len(new_players.players),
-        players=new_players.players,
+        players=sorted_player_list,
     )
 
-    # model_dump() converts the Pydantic model instance to a plain dict
-    # insert_one() requires a dict/Mapping, not a model instance
-    result = await user_sessions.insert_one(
-        new_user_session.model_dump(by_alias=True, exclude={"id"})
-    )
+    try:
+        # model_dump() converts the Pydantic model instance to a plain dict
+        # insert_one() requires a dict/Mapping, not a model instance
+        result = await user_sessions.insert_one(
+            new_user_session.model_dump(by_alias=True, exclude={"id"})
+        )
+    except DuplicateKeyError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="You've already registered this exact set of players. "
+                   "Use command '/list_players' to view your registered set of players. "
+                   "Use command '/help' for more information."
+        )
 
-    registered_players = ", ".join(new_players.players)  # -> converts list[str] to str
+    registered_players: str = ", ".join(new_players.players)  # -> converts list[str] to str
 
-    response = NewPlayersResponse(
+    response: NewPlayersResponse = NewPlayersResponse(
         id=str(result.inserted_id),
         players=registered_players,
         status="Players registered successfully."
