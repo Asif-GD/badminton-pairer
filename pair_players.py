@@ -30,14 +30,14 @@ def split(player_list: list[str]) -> tuple[dict[str, str], str | None]:
     :return: A tuple() of dict(players sorted into teams of two), and an unpaired player if any.
     """
     # random.shuffle + list.pop is cheaper compared to random.choice + list.remove
-    player_list_copy = player_list.copy()
+    player_list_copy: list[str] = player_list.copy()
     random.shuffle(player_list_copy)  # O(n), one pass
 
     unpaired_player: str | None = None
     if len(player_list_copy) % 2 == 1:
         unpaired_player = player_list_copy.pop()  # O(1) from the end
 
-    teams = generate_pairs(player_list_copy)
+    teams: dict[str, str] = generate_pairs(player_list_copy)
 
     return teams, unpaired_player
 
@@ -50,10 +50,10 @@ def pair_4_6_or_8_players(player_list: list[str]) -> dict[str, str]:
     :param player_list: The list of players that has to be paired.
     :return: A dict() of players sorted into teams of two.
     """
-    player_list_copy = player_list.copy()
+    player_list_copy: list[str] = player_list.copy()
     random.shuffle(player_list_copy)
 
-    teams = generate_pairs(player_list_copy)
+    teams: dict[str, str] = generate_pairs(player_list_copy)
 
     return teams
 
@@ -75,8 +75,8 @@ def pair_5_9_10_or_11_players(player_list: list[str], benched_player_list: list[
     :return: A tuple() of dict(players sorted into teams of two), list(benched players).
     """
 
-    benched_players = benched_player_list.copy()
-    player_list_copy = player_list.copy()
+    player_list_copy: list[str] = player_list.copy()
+    benched_players: list[str] = benched_player_list.copy()
 
     # set number of players to be benched
     """
@@ -85,7 +85,7 @@ def pair_5_9_10_or_11_players(player_list: list[str], benched_player_list: list[
         10 players -> 2 players are benched
         11 players -> 3 players are benched
     """
-    no_of_players_to_be_benched = len(player_list_copy) % 4
+    no_of_players_to_be_benched: int = len(player_list_copy) % 4
 
     """
     - after every player has been benched at least once, the cycle starts over.
@@ -96,7 +96,7 @@ def pair_5_9_10_or_11_players(player_list: list[str], benched_player_list: list[
         11 players -> at 4th iteration
     """
     while no_of_players_to_be_benched != 0:
-        player_to_be_benched = random.choice(player_list_copy)
+        player_to_be_benched: str = random.choice(player_list_copy)
 
         # to ensure every player gets benched at least once
         while player_to_be_benched in benched_players:  # reject-sampling
@@ -116,7 +116,7 @@ def pair_5_9_10_or_11_players(player_list: list[str], benched_player_list: list[
 
     random.shuffle(player_list_copy)
 
-    teams = generate_pairs(player_list_copy)
+    teams: dict[str, str] = generate_pairs(player_list_copy)
 
     return teams, benched_players
 
@@ -138,7 +138,7 @@ def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh
     :param seventh_player: The seventh player of the previous pairing, can be None in case of first pairing.
     :return: A tuple() of dict(players sorted into teams of two), list(lucky players), and seventh player.
     """
-    player_list_copy = player_list.copy()
+    player_list_copy: list[str] = player_list.copy()
     lucky_players: list[str] = lucky_player_list.copy()
 
     """
@@ -147,10 +147,10 @@ def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh
     - else, a random player becomes a lucky player
     """
     if len(player_list) == len(lucky_players):
-        lucky_player_this_pairing = lucky_players.pop(0)
+        lucky_player_this_pairing: str = lucky_players.pop(0)
 
     else:
-        lucky_player_this_pairing = random.choice(player_list_copy)
+        lucky_player_this_pairing: str = random.choice(player_list_copy)
 
         # to ensure every player gets to be lucky_player at least once
         while lucky_player_this_pairing in lucky_players:  # reject-sampling
@@ -161,6 +161,7 @@ def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh
 
     if seventh_player is None:  # -> usually in case of first pairing
         seventh_player = random.choice(player_list_copy)
+
     player_list_copy.remove(seventh_player)
 
     """
@@ -174,7 +175,7 @@ def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh
     player_list_copy.append(seventh_player)
     player_list_copy.append(lucky_player_this_pairing)
 
-    teams = generate_pairs(player_list_copy)
+    teams: dict[str, str] = generate_pairs(player_list_copy)
 
     # after the teams are generated, the lucky_player_this_pairing becomes seventh_player for next pairing
     seventh_player = lucky_player_this_pairing
@@ -195,9 +196,9 @@ def pair_12_players(player_list: list[str]) -> dict[str, str]:
         in the future the return response would change based on number of courts available. 
     - So, keeping it separate for now.
     """
-    player_list_copy = player_list.copy()
+    player_list_copy: list[str] = player_list.copy()
     random.shuffle(player_list_copy)
 
-    teams = generate_pairs(player_list_copy)
+    teams: dict[str, str] = generate_pairs(player_list_copy)
 
     return teams
