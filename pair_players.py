@@ -4,7 +4,7 @@ import random
 def generate_pairs(player_list: list[str]) -> dict[str, str]:
     """
         IMPLEMENTATION: ->
-            - Players from the list as split into groups of two, consecutively.
+            - Players from the list are split into groups of two, consecutively.
 
         NOTE: assumes an even-length player_list; the caller is responsible for handling any odd one out.
 
