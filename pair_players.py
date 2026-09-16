@@ -1,8 +1,16 @@
 import random
 
 
-def generate_pairs(player_list: list[str]) \
-        -> dict[str, str]:
+def generate_pairs(player_list: list[str]) -> dict[str, str]:
+    """
+        IMPLEMENTATION: ->
+            - Players from the list as split into groups of two, consecutively.
+
+        NOTE: assumes an even-length player_list; the caller is responsible for handling any odd one out.
+
+    :param player_list: The list of players that has to be paired.
+    :return: A dict() of players sorted into teams of two.
+    """
     team_number: int = 1
     pairs: dict[str, str] = dict()
     for i in range(0, len(player_list), 2):
@@ -12,12 +20,14 @@ def generate_pairs(player_list: list[str]) \
     return pairs
 
 
-def split(player_list: list[str]) \
-        -> tuple[dict[str, str], str | None]:
+def split(player_list: list[str]) -> tuple[dict[str, str], str | None]:
     """
         IMPLEMENTATION: -> No priority. No saved session or tracked.
             - Players are paired in random order.
             - If there are odd number of players, one player is chosen at random and remains unpaired.
+
+    :param player_list: The list of players that has to be paired.
+    :return: A tuple() of dict(players sorted into teams of two), and an unpaired player if any.
     """
     # random.shuffle + list.pop is cheaper compared to random.choice + list.remove
     player_list_copy = player_list.copy()
@@ -32,11 +42,13 @@ def split(player_list: list[str]) \
     return teams, unpaired_player
 
 
-def pair_4_6_or_8_players(player_list: list[str]) \
-        -> dict[str, str]:
+def pair_4_6_or_8_players(player_list: list[str]) -> dict[str, str]:
     """
-            IMPLEMENTATION: -> no priority.
-                - players are paired in random order.
+        IMPLEMENTATION: -> no priority.
+                    - players are paired in random order.
+
+    :param player_list: The list of players that has to be paired.
+    :return: A dict() of players sorted into teams of two.
     """
     player_list_copy = player_list.copy()
     random.shuffle(player_list_copy)
@@ -50,13 +62,17 @@ def pair_5_9_10_or_11_players(player_list: list[str], benched_player_list: list[
         -> tuple[dict[str, str], list[str]]:
     """
         IMPLEMENTATION:
-            - bench a random player not already in benched_players this cycle;
-                reset when everyone's had a turn.
-            - in case of
-                5 or 9 players -> 1 player is benched
-                10 players -> 2 players are benched
-                11 players -> 3 players are benched
-            - the remaining four players are paired at random.
+                - bench a random player not already in benched_player_list this cycle;
+                    reset when everyone's had a turn.
+                - in case of
+                    5 or 9 players -> 1 player is benched
+                    10 players -> 2 players are benched
+                    11 players -> 3 players are benched
+                - the remaining four players are paired at random.
+
+    :param player_list: The list of players that has to be paired.
+    :param benched_player_list: The list of players who have been benched in previous pairings.
+    :return: A tuple() of dict(players sorted into teams of two), list(benched players).
     """
 
     benched_players = benched_player_list.copy()
@@ -116,6 +132,11 @@ def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh
                 as he would have played two matches consecutively.
             - lucky_player & seventh_player will be retrieved from db.
             - a lucky_player list is maintained to ensure everyone gets fair number of games in a session.
+
+    :param player_list: The list of players that has to be paired.
+    :param lucky_player_list: The list of players who have been lucky players in previous pairings.
+    :param seventh_player: The seventh player of the previous pairing, can be None in case of first pairing.
+    :return: A tuple() of dict(players sorted into teams of two), list(lucky players), and seventh player.
     """
     player_list_copy = player_list.copy()
     lucky_players: list[str] = lucky_player_list.copy()
@@ -161,14 +182,16 @@ def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh
     return teams, lucky_players, seventh_player
 
 
-def pair_12_players(player_list: list[str]) \
-        -> dict[str, str]:
+def pair_12_players(player_list: list[str]) -> dict[str, str]:
     """
         IMPLEMENTATION: -> no priority.
             - players are paired in random order.
+
+    :param player_list: The list of players that has to be paired.
+    :return: A dict() of players sorted into teams of two.
     """
     """
-    - note -> although the core logic is the same as pair_4_6_or_8_players(), 
+    - NOTE: Although the core logic is the same as pair_4_6_or_8_players(), 
         in the future the return response would change based on number of courts available. 
     - So, keeping it separate for now.
     """
