@@ -13,7 +13,7 @@ pair_router = APIRouter(
     tags=["pair"],
 )
 
-# test accounts
+# test accounts -> placeholders
 FOUR_PLAYERS: Final[str] = "place_holder_4"
 FIVE_PLAYERS: Final[str] = "place_holder_5"
 SIX_PLAYERS: Final[str] = "place_holder_6"
