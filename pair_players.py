@@ -147,6 +147,7 @@ def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh
     - the lucky_player_this_pairing is inserted twice, at the start and at the end of the list
         to prevent generate_pairs() from running into list index out of range error.
     """
+    # todo -> this needs a separate test case.
     random.shuffle(player_list_copy)
     player_list_copy.insert(0, lucky_player_this_pairing)
     player_list_copy.append(seventh_player)
