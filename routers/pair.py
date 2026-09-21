@@ -64,6 +64,7 @@ async def register_players(new_players: NewPlayersRequest,
     :param user_sessions: Injected user_sessions collection dependency.
     :return: A response model of type NewPlayersResponse containing the '_id' from the db, the list of players,
         and a status message 'Players registered successfully.'.
+    :raises HTTPException 409: In case the user has the same set of players already registered under them.
     """
     # TODO: hardcoded for now -- will come from the discord bot.
     username: str = f"place_holder_{len(new_players.players)}"
