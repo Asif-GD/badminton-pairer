@@ -1,4 +1,4 @@
-from typing import Final
+from typing import Final, Any
 
 from fastapi import APIRouter, HTTPException
 from pymongo.errors import DuplicateKeyError
@@ -109,13 +109,16 @@ async def register_players(new_players: NewPlayersRequest,
     response_description="Shuffles players and pairs them.",
     status_code=status.HTTP_200_OK
 )
-async def shuffle_players(user_sessions: user_sessions_dependency):
+async def shuffle_players(user_sessions: user_sessions_dependency) \
+        -> PairingsResponse | PairingsWithBenchedPlayerResponse:
     """
         Shuffles players and pairs them into teams and returns it to user.
-    :param user_sessions:
-    :return:
-    """
 
+    :param user_sessions: Injected user_sessions collection dependency.
+    :return: The players paired into teams in a PairingsResponse or PairingsWithBenchedPlayerResponse model.
+    :raises HTTPException 404: If user has no registered players under them.
+    :raises HTTPException 500: If the stored player count is outside the supported range (data-integrity issue).
+    """
     # TODO: hardcoded for now -- will come from the discord bot.
     username = FIVE_PLAYERS
     filter_query = {
@@ -131,17 +134,17 @@ async def shuffle_players(user_sessions: user_sessions_dependency):
         "_id": 0
     }
 
-    # find_one() because user will have at most one session
-    """
-        doc : {
-            "no_of_player" : int,
-            "players" : list[str],
-            "benched_players": list[str],
-            "lucky_players": list[str],
-            "seventh_player": str
-        }
-    """
-    doc = await user_sessions.find_one(filter_query, projection)
+    # find_one() because user will have at most one session (for now)
+
+    # doc : {
+    #     "no_of_players" : int,
+    #     "players" : list[str],
+    #     "benched_players": list[str],
+    #     "lucky_players": list[str],
+    #     "seventh_player": str
+    # }
+
+    doc: dict[str, Any] | None = await user_sessions.find_one(filter_query, projection)
 
     if doc is None:
         raise HTTPException(
@@ -155,9 +158,9 @@ async def shuffle_players(user_sessions: user_sessions_dependency):
     db_lucky_players = doc["lucky_players"]
     db_seventh_player = doc["seventh_player"]
 
-    if db_player_count == 4 or db_player_count == 6 or db_player_count == 8:
+    if db_player_count in {4, 6, 8}:
         return await handle_4_6_or_8_player_pairings(players=db_players)
-    elif db_player_count == 5 or db_player_count == 9 or db_player_count == 10 or db_player_count == 11:
+    elif db_player_count in {5, 9, 10, 11}:
         return await handle_5_9_10_or_11_player_pairings(players=db_players, benched_players=db_benched_players,
                                                          user_sessions=user_sessions)
     elif db_player_count == 7:
@@ -166,7 +169,11 @@ async def shuffle_players(user_sessions: user_sessions_dependency):
     elif db_player_count == 12:
         return await handle_12_player_pairings(players=db_players)
     else:
-        return "I am unable to comply with this request. Too many players!"
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to process this request. Please try again. "
+                   "Use command '/help' for more information."
+        )
 
 
 async def handle_4_6_or_8_player_pairings(players: list[str]) -> PairingsResponse:
