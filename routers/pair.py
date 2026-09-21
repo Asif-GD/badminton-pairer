@@ -78,6 +78,7 @@ async def register_players(new_players: NewPlayersRequest,
         players=sorted_player_list,
     )
 
+    # we insert only when the user hasn't already registered the same set of players.
     try:
         # model_dump() converts the Pydantic model instance to a plain dict
         # insert_one() requires a dict/Mapping, not a model instance
