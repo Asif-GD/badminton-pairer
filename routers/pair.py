@@ -183,7 +183,7 @@ async def handle_4_6_or_8_player_pairings(players: list[str]) -> PairingsRespons
         Pairs the players and wraps it into the PairingsResponse model.
 
     :param players: The list of players to be paired.
-    :return: The paired players and a benched player as a PairingsResponse model.
+    :return: The paired players as a PairingsResponse model.
     """
     pairings = pair_4_6_or_8_players(player_list=players)
 
@@ -246,7 +246,7 @@ async def handle_7_player_pairings(username: str, players: list[str], lucky_play
     :param lucky_players: The list of players who was a lucky player at previous pairings, if any.
     :param seventh_player: The lucky player from the previous pairing stored as seventh player in the db.
     :param user_sessions: Injected user_sessions collections dependency.
-    :return: The paired players and a benched player as a PairingsResponse model.
+    :return: The paired players as a PairingsResponse model.
     """
     pairings, lucky_players, seventh_player = pair_7_players(player_list=players, lucky_player_list=lucky_players,
                                                              seventh_player=seventh_player)
@@ -279,7 +279,7 @@ async def handle_12_player_pairings(players: list[str]) -> PairingsResponse:
         Pairs the players and wraps it into the PairingsResponse model.
 
     :param players: The list of players to be paired.
-    :return: The paired players and a benched player as a PairingsResponse model.
+    :return: The paired players as a PairingsResponse model.
     """
     pairings = pair_12_players(player_list=players)
 
