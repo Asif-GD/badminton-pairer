@@ -166,7 +166,7 @@ async def shuffle_players(user_sessions: user_sessions_dependency) \
                                                          benched_players=db_benched_players,
                                                          user_sessions=user_sessions)
     elif db_player_count == 7:
-        return await handle_7_player_pairings(players=db_players, lucky_players=db_lucky_players,
+        return await handle_7_player_pairings(username=username, players=db_players, lucky_players=db_lucky_players,
                                               seventh_player=db_seventh_player, user_sessions=user_sessions)
     elif db_player_count == 12:
         return await handle_12_player_pairings(players=db_players)
@@ -235,22 +235,21 @@ async def handle_5_9_10_or_11_player_pairings(username: str, players: list[str],
     return response
 
 
-async def handle_7_player_pairings(players: list[str], lucky_players: list[str], seventh_player: str,
+async def handle_7_player_pairings(username: str, players: list[str], lucky_players: list[str], seventh_player: str,
                                    user_sessions: user_sessions_dependency) -> PairingsResponse:
     """
-        Wraps the pair_7_players() into the PairingsResponse model. Also updates db.
-    :param user_sessions:
-    :param players:
-    :param lucky_players:
-    :param seventh_player:
-    :return:
-    """
+        Pairs the players and wraps it into the PairingsResponse model. Also updates db.
 
+    :param username: The username under whom the players are registered.
+    :param players: The list of players to be paired.
+    :param lucky_players: The list of players who was a lucky player at previous pairings, if any.
+    :param seventh_player: The lucky player from the previous pairing stored as seventh player in the db.
+    :param user_sessions: Injected user_sessions collections dependency.
+    :return: The paired players and a benched player as a PairingsResponse model.
+    """
     pairings, lucky_players, seventh_player = pair_7_players(player_list=players, lucky_player_list=lucky_players,
                                                              seventh_player=seventh_player)
 
-    # TODO: hardcoded for now -- will come from the discord bot.
-    username = SEVEN_PLAYERS
     filter_query = {
         "username": username
     }
