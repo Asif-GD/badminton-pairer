@@ -2,6 +2,7 @@ from typing import Final, Any
 
 from fastapi import APIRouter, HTTPException
 from pymongo.errors import DuplicateKeyError
+from pymongo.results import InsertOneResult
 from starlette import status
 
 from database.models import UserSession, user_sessions_dependency
@@ -68,7 +69,8 @@ async def register_players(new_players: NewPlayersRequest,
     """
     # TODO: hardcoded for now -- will come from the discord bot.
     username: str = f"place_holder_{len(new_players.players)}"
-    sorted_player_list: list[str] = sorted(new_players.players)
+    # session_id is indexed and unique, we sort players into a new list before passing to create_session_id()
+    sorted_player_list: list[str] = sorted(new_players.players)  # sort list for uniformity
 
     session_id: str = create_session_id(username=username, player_list=sorted_player_list)
 
@@ -83,7 +85,7 @@ async def register_players(new_players: NewPlayersRequest,
     try:
         # model_dump() converts the Pydantic model instance to a plain dict
         # insert_one() requires a dict/Mapping, not a model instance
-        result = await user_sessions.insert_one(
+        result: InsertOneResult = await user_sessions.insert_one(
             new_user_session.model_dump(by_alias=True, exclude={"id"})
         )
     except DuplicateKeyError:
