@@ -162,7 +162,8 @@ async def shuffle_players(user_sessions: user_sessions_dependency) \
     if db_player_count in {4, 6, 8}:
         return await handle_4_6_or_8_player_pairings(players=db_players)
     elif db_player_count in {5, 9, 10, 11}:
-        return await handle_5_9_10_or_11_player_pairings(players=db_players, benched_players=db_benched_players,
+        return await handle_5_9_10_or_11_player_pairings(username=username, players=db_players,
+                                                         benched_players=db_benched_players,
                                                          user_sessions=user_sessions)
     elif db_player_count == 7:
         return await handle_7_player_pairings(players=db_players, lucky_players=db_lucky_players,
@@ -192,21 +193,20 @@ async def handle_4_6_or_8_player_pairings(players: list[str]) -> PairingsRespons
     return response
 
 
-async def handle_5_9_10_or_11_player_pairings(players: list[str], benched_players: list[str],
+async def handle_5_9_10_or_11_player_pairings(username: str, players: list[str], benched_players: list[str],
                                               user_sessions: user_sessions_dependency) \
         -> PairingsWithBenchedPlayerResponse:
     """
-        Wraps the handle_5_9_10_or_11_player_pairings() into the PairingsWithBenchedPlayerResponse model. Also updates db.
-    :param user_sessions:
-    :param benched_players:
-    :param players:
-    :return:
-    """
+        Pairs the players and wraps it into the PairingsWithBenchedPlayerResponse model. Also updates db.
 
+    :param username: The username under whom the players are registered.
+    :param players: The list of players to be paired.
+    :param benched_players: The list of players already benched, if any.
+    :param user_sessions: Injected user_sessions collections dependency.
+    :return: The paired players and a benched player as a PairingsWithBenchedPlayerResponse model.
+    """
     pairings, benched_players = pair_5_9_10_or_11_players(player_list=players, benched_player_list=benched_players)
 
-    # TODO: hardcoded for now -- will come from the discord bot.
-    username = FIVE_PLAYERS
     filter_query = {
         "username": username
     }
