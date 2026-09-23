@@ -123,12 +123,12 @@ async def shuffle_players(user_sessions: user_sessions_dependency) \
     :raises HTTPException 500: If the stored player count is outside the supported range (data-integrity issue).
     """
     # TODO: hardcoded for now -- will come from the discord bot.
-    username = FIVE_PLAYERS
-    filter_query = {
+    username: str = FIVE_PLAYERS
+    filter_query: dict[str, Any] = {
         "username": username
     }
     # fields to include, '_id' is always included by default (can't combine include & exclude, except for '_id')
-    projection = {
+    projection: dict[str, int] = {
         "no_of_players": 1,
         "players": 1,
         "benched_players": 1,
@@ -155,11 +155,11 @@ async def shuffle_players(user_sessions: user_sessions_dependency) \
             detail=f"No session found for user '{username}'. Please register."
         )
 
-    db_player_count = doc["no_of_players"]
-    db_players = doc["players"]
-    db_benched_players = doc["benched_players"]
-    db_lucky_players = doc["lucky_players"]
-    db_seventh_player = doc["seventh_player"]
+    db_player_count: int = doc["no_of_players"]
+    db_players: list[str] = doc["players"]
+    db_benched_players: list[str] = doc["benched_players"]
+    db_lucky_players: list[str] = doc["lucky_players"]
+    db_seventh_player: str = doc["seventh_player"]
 
     if db_player_count in {4, 6, 8}:
         return await handle_4_6_or_8_player_pairings(players=db_players)
