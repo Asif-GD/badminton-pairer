@@ -187,9 +187,9 @@ async def handle_4_6_or_8_player_pairings(players: list[str]) -> PairingsRespons
     :param players: The list of players to be paired.
     :return: The paired players as a PairingsResponse model.
     """
-    pairings = pair_4_6_or_8_players(player_list=players)
+    pairings: dict[str, str] = pair_4_6_or_8_players(player_list=players)
 
-    response = PairingsResponse(
+    response: PairingsResponse = PairingsResponse(
         teams=pairings
     )
 
@@ -211,10 +211,10 @@ async def handle_5_9_10_or_11_player_pairings(username: str, players: list[str],
     """
     pairings, benched_players = pair_5_9_10_or_11_players(player_list=players, benched_player_list=benched_players)
 
-    filter_query = {
+    filter_query: dict[str, Any] = {
         "username": username
     }
-    fields_to_update = {
+    fields_to_update: dict[str, Any] = {
         "benched_players": benched_players
     }
 
@@ -233,11 +233,13 @@ async def handle_5_9_10_or_11_player_pairings(username: str, players: list[str],
         )
 
     # we only return the players benched this turn and not the entire list
-    no_of_players_to_be_benched = len(players) % 4
-    benched_players = benched_players[- no_of_players_to_be_benched:]
+    no_of_players_to_be_benched: int = len(players) % 4
+    # players benched this pairing are appended to the end of the list
+    # so, extracting only them using list slice
+    benched_players: list[str] = benched_players[- no_of_players_to_be_benched:]
     players_display: str = ", ".join(benched_players)  # converts the list[str] to str
 
-    response = PairingsWithBenchedPlayerResponse(
+    response: PairingsWithBenchedPlayerResponse = PairingsWithBenchedPlayerResponse(
         teams=pairings,
         benched_player=players_display
     )
@@ -261,10 +263,10 @@ async def handle_7_player_pairings(username: str, players: list[str], lucky_play
     pairings, lucky_players, seventh_player = pair_7_players(player_list=players, lucky_player_list=lucky_players,
                                                              seventh_player=seventh_player)
 
-    filter_query = {
+    filter_query: dict[str, Any] = {
         "username": username
     }
-    fields_to_update = {
+    fields_to_update: dict[str, Any] = {
         "lucky_players": lucky_players,
         "seventh_player": seventh_player
     }
@@ -283,7 +285,7 @@ async def handle_7_player_pairings(username: str, players: list[str], lucky_play
             detail=f"No session found for user '{username}'. Please register."
         )
 
-    response = PairingsResponse(
+    response: PairingsResponse = PairingsResponse(
         teams=pairings
     )
 
@@ -297,9 +299,9 @@ async def handle_12_player_pairings(players: list[str]) -> PairingsResponse:
     :param players: The list of players to be paired.
     :return: The paired players as a PairingsResponse model.
     """
-    pairings = pair_12_players(player_list=players)
+    pairings: dict[str, str] = pair_12_players(player_list=players)
 
-    response = PairingsResponse(
+    response: PairingsResponse = PairingsResponse(
         teams=pairings
     )
 
