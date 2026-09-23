@@ -149,9 +149,14 @@ class SplitPlayersResponse(BaseModel):
         }
     )
 
-    no_of_players: int
     teams: dict[str, str]
     unpaired_player: str | None = None
+
+    @computed_field  # marks this as a schema field, even though it's not stored
+    @property
+    def no_of_players(self) -> int:
+        # always derived -- never set directly, never goes stale
+        return len(self.teams) * 2 + (1 if self.unpaired_player else 0)
 
     @computed_field  # marks this as a schema field, even though it's not stored
     @property

@@ -324,7 +324,6 @@ async def split_players(players: SplitPlayersRequest) -> SplitPlayersResponse:
     pairings, unpaired_player = split(player_list=players.players)
 
     response: SplitPlayersResponse = SplitPlayersResponse(
-        no_of_players=len(players.players),
         teams=pairings,
         unpaired_player=unpaired_player
     )
