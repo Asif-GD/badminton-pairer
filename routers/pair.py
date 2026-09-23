@@ -2,7 +2,7 @@ from typing import Final, Any
 
 from fastapi import APIRouter, HTTPException
 from pymongo.errors import DuplicateKeyError
-from pymongo.results import InsertOneResult
+from pymongo.results import InsertOneResult, UpdateResult
 from starlette import status
 
 from database.models import UserSession, user_sessions_dependency
@@ -207,6 +207,7 @@ async def handle_5_9_10_or_11_player_pairings(username: str, players: list[str],
     :param benched_players: The list of players already benched, if any.
     :param user_sessions: Injected user_sessions collections dependency.
     :return: The paired players and a benched player as a PairingsWithBenchedPlayerResponse model.
+    :raises HTTPException 404: If the user's session was not found during the update (e.g. deleted concurrently).
     """
     pairings, benched_players = pair_5_9_10_or_11_players(player_list=players, benched_player_list=benched_players)
 
@@ -218,12 +219,18 @@ async def handle_5_9_10_or_11_player_pairings(username: str, players: list[str],
     }
 
     # update_one() because a user can have at most one registered set of players i.e. one record of players.
-    result = await user_sessions.update_one(
+    result: UpdateResult = await user_sessions.update_one(
         filter_query,
         update={
             "$set": fields_to_update
         },
     )
+
+    if result.matched_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No session found for user '{username}'. Please register."
+        )
 
     # we only return the players benched this turn and not the entire list
     no_of_players_to_be_benched = len(players) % 4
@@ -249,6 +256,7 @@ async def handle_7_player_pairings(username: str, players: list[str], lucky_play
     :param seventh_player: The lucky player from the previous pairing stored as seventh player in the db.
     :param user_sessions: Injected user_sessions collections dependency.
     :return: The paired players as a PairingsResponse model.
+    :raises HTTPException 404: If the user's session was not found during the update (e.g. deleted concurrently).
     """
     pairings, lucky_players, seventh_player = pair_7_players(player_list=players, lucky_player_list=lucky_players,
                                                              seventh_player=seventh_player)
@@ -262,12 +270,18 @@ async def handle_7_player_pairings(username: str, players: list[str], lucky_play
     }
 
     # update_one() because a user can have at most one registered set of players i.e. one record of players.
-    result = await user_sessions.update_one(
+    result: UpdateResult = await user_sessions.update_one(
         filter_query,
         update={
             "$set": fields_to_update
         },
     )
+
+    if result.matched_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No session found for user '{username}'. Please register."
+        )
 
     response = PairingsResponse(
         teams=pairings
