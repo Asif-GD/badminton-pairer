@@ -157,3 +157,15 @@ class SplitPlayersResponse(BaseModel):
     def no_of_teams(self) -> int:
         # always derived -- never set directly, never goes stale
         return len(self.teams)
+
+
+class DeleteUserResponse(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "message": "User 'username' has been deleted."
+            }
+        }
+    )
+
+    message: str
