@@ -32,6 +32,10 @@ TWELVE_PLAYERS: Final[str] = "place_holder_12"
 def get_validated_player_name(name: str) -> str:
     """
         Translates validate_player_name ValueError into HTTPException
+
+    :param name: The player's name.
+    :return: The player's name, after validation.
+    :raises HTTPException 422: If the player's name fails validation.
     """
     try:
         return validate_player_name(name)
@@ -70,8 +74,9 @@ def build_list_players_response(doc: dict[str, Any]) -> ListPlayersResponse:
 async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersResponse:
     """
         Lists the players registered under the user.
+
     :param user_sessions: Injected user_sessions collections dependency.
-    :return: The list of players registered under the user.
+    :return: The list of players registered under the user wrapped in ListPlayersResponse.
     :raises HTTPException 404: If no user record exists.
     """
     # TODO: hardcoded for now -- will come from the discord bot.
@@ -109,9 +114,10 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
         -> ListPlayersResponse:
     """
         Adds a player to the list of registered players under the user.
+
     :param name: Incoming path parameter that holds the player's name to be added.
-    :param user_sessions: Injected user_sessions collections dependency
-    :return: The updated players list for the user.
+    :param user_sessions: Injected user_sessions collections dependency.
+    :return: The updated players list for the user wrapped in ListPlayersResponse.
     :raises HTTPException 404: If no user record exists.
     :raises HTTPException 400: If player already registered under user,
         or user has maximum number of players registered.
@@ -119,11 +125,9 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
     # TODO: hardcoded for now -- will come from the discord bot.
     username: str = NINE_PLAYERS
 
-    """
-        filter_query -> find user session of 'username' where 'name' isn't already registered under user 
-            and number of players is less than MAX_PLAYER_COUNT
-    """
-    filter_query: dict = {
+    # filter_query -> find user session of 'username' where 'name' isn't already registered under user
+    #     and number of players is less than MAX_PLAYER_COUNT
+    filter_query: dict[str, Any] = {
         "username": username,
         "players": {
             "$ne": name  # -> no duplicates allowed
@@ -133,11 +137,9 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
         }
     }
 
-    """
-        update_pipeline -> update happens as an aggregate-pipeline update because the 'no_of_players' should
-            reflect the length of 'players' after the player has been added.        
-    """
-    update_pipeline: list[dict] = [
+    # update_pipeline -> update happens as an aggregate-pipeline update because the 'no_of_players' should
+    #     reflect the length of 'players' after the player has been added.
+    update_pipeline: list[dict[str, Any]] = [
         {
             "$set": {
                 "players": {
@@ -165,12 +167,10 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
         return_document=ReturnDocument.AFTER
     )
 
-    """
-        doc could be None for multiple reasons
-            - 1. username wasn't found
-            - 2. player already registered under user
-            - 3. user has maximum number of players registered.
-    """
+    # doc could be None for multiple reasons
+    #     - 1. username wasn't found
+    #     - 2. player already registered under user
+    #     - 3. user has maximum number of players registered.
     if doc is None:
         existing_user_doc: dict[str, Any] | None = await user_sessions.find_one({"username": username})
 
@@ -211,9 +211,10 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
         -> ListPlayersResponse:
     """
         Removes a player from the list of registered players under the user.
+
     :param name: Incoming path parameter that holds the player's name to be removed.
     :param user_sessions: Injected user_sessions collections dependency
-    :return: The updated players list for the user.
+    :return: The updated players list for the user wrapped in ListPlayersResponse.
     :raises HTTPException 404: If no user record exists.
     :raises HTTPException 400: If player is not found registered under user,
         or user is at minimum number of players registered.
@@ -221,11 +222,9 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
     # TODO: hardcoded for now -- will come from the discord bot.
     username: str = NINE_PLAYERS
 
-    """
-        - filter_query -> find user session of 'username' where player == 'name' and 
-            the number of players registered is greater than MIN_PLAYER_COUNT.
-    """
-    filter_query: dict = {
+    # filter_query -> find user session of 'username' where player == 'name' and
+    #     the number of players registered is greater than MIN_PLAYER_COUNT.
+    filter_query: dict[str, Any] = {
         "username": username,
         "players": name,  # checks if 'name' is in the players[] list in db
         "$expr": {
@@ -233,11 +232,9 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
         }
     }
 
-    """
-        update_pipeline -> update happens as an aggregate-pipeline update because the 'no_of_players' should
-            reflect the length of 'players' after the player has been removed.        
-    """
-    update_pipeline: list[dict] = [
+    # update_pipeline -> update happens as an aggregate-pipeline update because the 'no_of_players' should
+    #     reflect the length of 'players' after the player has been removed.
+    update_pipeline: list[dict[str, Any]] = [
         {
             "$set": {
                 "players": {
@@ -272,12 +269,10 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
         return_document=ReturnDocument.AFTER
     )
 
-    """
-        doc could be None for multiple reasons
-            - 1. username wasn't found
-            - 2. player NOT registered under user
-            - 3. user has the minimum number of players registered, and cannot remove more.
-    """
+    # doc could be None for multiple reasons
+    #     - 1. username wasn't found
+    #     - 2. player NOT registered under user
+    #     - 3. user has the minimum number of players registered, and cannot remove more.
     if doc is None:
         existing_user_doc: dict[str, Any] | None = await user_sessions.find_one({"username": username})
 
@@ -318,9 +313,10 @@ async def update_players(new_players: NewPlayersRequest, user_sessions: user_ses
         -> ListPlayersResponse:
     """
         Updates (replaces) the entire list of registered players under user.
+
     :param new_players: Incoming request body containing the new list of players.
     :param user_sessions: Injected user_sessions collection dependency.
-    :return: The updated players list for the user.
+    :return: The updated players list for the user wrapped in ListPlayersResponse.
     :raises HTTPException 404: If no user record exists.
     """
     # TODO: hardcoded for now -- will come from the discord bot.
