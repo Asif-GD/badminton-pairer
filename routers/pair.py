@@ -63,8 +63,8 @@ async def register_players(new_players: NewPlayersRequest,
 
     :param new_players: Incoming request body containing the new list of players.
     :param user_sessions: Injected user_sessions collection dependency.
-    :return: A response model of type NewPlayersResponse containing the '_id' from the db, the list of players,
-        and a status message 'Players registered successfully.'.
+    :return: The '_id' from the db, the list of players, and a status message 'Players registered successfully.'
+        wrapped in NewPlayersResponse model.
     :raises HTTPException 409: In case the user has the same set of players already registered under them.
     """
     # TODO: hardcoded for now -- will come from the discord bot.
@@ -119,7 +119,7 @@ async def shuffle_players(user_sessions: user_sessions_dependency) \
         Shuffles players and pairs them into teams and returns it to user.
 
     :param user_sessions: Injected user_sessions collection dependency.
-    :return: The players paired into teams in a PairingsResponse or PairingsWithBenchedPlayerResponse model.
+    :return: The players paired into teams wrapped in a PairingsResponse or PairingsWithBenchedPlayerResponse model.
     :raises HTTPException 404: If user has no registered players under them.
     :raises HTTPException 500: If the stored player count is outside the supported range (data-integrity issue).
     """
@@ -186,7 +186,7 @@ async def handle_4_6_or_8_player_pairings(players: list[str]) -> PairingsRespons
         Pairs the players and wraps it into the PairingsResponse model.
 
     :param players: The list of players to be paired.
-    :return: The paired players as a PairingsResponse model.
+    :return: The paired players wrapped in a PairingsResponse model.
     """
     pairings: dict[str, str] = pair_4_6_or_8_players(player_list=players)
 
@@ -207,7 +207,7 @@ async def handle_5_9_10_or_11_player_pairings(username: str, players: list[str],
     :param players: The list of players to be paired.
     :param benched_players: The list of players already benched, if any.
     :param user_sessions: Injected user_sessions collections dependency.
-    :return: The paired players and a benched player as a PairingsWithBenchedPlayerResponse model.
+    :return: The paired players and a benched player wrapped in a PairingsWithBenchedPlayerResponse model.
     :raises HTTPException 404: If the user's session was not found during the update (e.g. deleted concurrently).
     """
     pairings, benched_players = pair_5_9_10_or_11_players(player_list=players, benched_player_list=benched_players)
@@ -258,7 +258,7 @@ async def handle_7_player_pairings(username: str, players: list[str], lucky_play
     :param lucky_players: The list of players who was a lucky player at previous pairings, if any.
     :param seventh_player: The lucky player from the previous pairing stored as seventh player in the db.
     :param user_sessions: Injected user_sessions collections dependency.
-    :return: The paired players as a PairingsResponse model.
+    :return: The paired players wrapped in a PairingsResponse model.
     :raises HTTPException 404: If the user's session was not found during the update (e.g. deleted concurrently).
     """
     pairings, lucky_players, seventh_player = pair_7_players(player_list=players, lucky_player_list=lucky_players,
@@ -298,7 +298,7 @@ async def handle_12_player_pairings(players: list[str]) -> PairingsResponse:
         Pairs the players and wraps it into the PairingsResponse model.
 
     :param players: The list of players to be paired.
-    :return: The paired players as a PairingsResponse model.
+    :return: The paired players wrapped in a PairingsResponse model.
     """
     pairings: dict[str, str] = pair_12_players(player_list=players)
 
@@ -320,7 +320,7 @@ async def split_players(players: SplitPlayersRequest) -> SplitPlayersResponse:
         Split the players in pairs of two given by the user, randomly.
 
     :param players: The list of players to be paired.
-    :return: The pairings of players and unpaired player, if any.
+    :return: The pairings of players and unpaired player, if any wrapped in a SplitPlayersResponse.
     """
 
     pairings, unpaired_player = split(player_list=players.players)
