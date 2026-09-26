@@ -8,9 +8,10 @@ def validate_player_name(name: str) -> str:
                 -> single name (or)
                 -> firstname_lastname
             - no special characters allowed, except underscore.
+
     :param name: Player's name.
     :return: Player's name after validation, capitalized.
-    :raises ValueError: if any of the above rules are violated.
+    :raises ValueError: If any of the above rules are violated.
     """
 
     # cannot be empty
