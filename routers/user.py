@@ -1,4 +1,4 @@
-from typing import Final, Annotated
+from typing import Final, Annotated, Any
 
 from fastapi import APIRouter, HTTPException, Depends
 from pymongo.asynchronous.collection import ReturnDocument
@@ -75,18 +75,18 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
     :raises HTTPException 404: If no user record exists.
     """
     # TODO: hardcoded for now -- will come from the discord bot.
-    username = FOUR_PLAYERS
-    filter_query = {
+    username: str = FOUR_PLAYERS
+    filter_query: dict[str, Any] = {
         "username": username
     }
-    projection = {
+    projection: dict[str, int] = {
         "username": 1,
         "no_of_players": 1,
         "players": 1,
         "_id": 0
     }
 
-    doc = await user_sessions.find_one(filter_query, projection)
+    doc: dict[str, Any] | None = await user_sessions.find_one(filter_query, projection)
 
     if doc is None:
         raise HTTPException(
@@ -159,7 +159,7 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
         }
     ]
 
-    doc = await user_sessions.find_one_and_update(
+    doc: dict[str, Any] | None = await user_sessions.find_one_and_update(
         filter_query,
         update_pipeline,
         return_document=ReturnDocument.AFTER
@@ -172,7 +172,7 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
             - 3. user has maximum number of players registered.
     """
     if doc is None:
-        existing_user_doc = await user_sessions.find_one({"username": username})
+        existing_user_doc: dict[str, Any] | None = await user_sessions.find_one({"username": username})
 
         # 1. username wasn't found
         if existing_user_doc is None:
@@ -266,7 +266,7 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
         }
     ]
 
-    doc = await user_sessions.find_one_and_update(
+    doc: dict[str, Any] | None = await user_sessions.find_one_and_update(
         filter_query,
         update_pipeline,
         return_document=ReturnDocument.AFTER
@@ -279,7 +279,7 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
             - 3. user has the minimum number of players registered, and cannot remove more.
     """
     if doc is None:
-        existing_user_doc = await user_sessions.find_one({"username": username})
+        existing_user_doc: dict[str, Any] | None = await user_sessions.find_one({"username": username})
 
         # 1. username wasn't found
         if existing_user_doc is None:
@@ -324,11 +324,11 @@ async def update_players(new_players: NewPlayersRequest, user_sessions: user_ses
     :raises HTTPException 404: If no user record exists.
     """
     # TODO: hardcoded for now -- will come from the discord bot.
-    username = FOUR_PLAYERS
-    filter_query = {
+    username: str = FOUR_PLAYERS
+    filter_query: dict[str, Any] = {
         "username": username
     }
-    fields_to_update = {
+    fields_to_update: dict[str, Any] = {
         "players": new_players.players,
         "no_of_players": len(new_players.players),
         # Resetting benched/lucky/seventh player on update,
@@ -338,7 +338,7 @@ async def update_players(new_players: NewPlayersRequest, user_sessions: user_ses
         "seventh_player": None
     }
 
-    doc = await user_sessions.find_one_and_update(
+    doc: dict[str, Any] | None = await user_sessions.find_one_and_update(
         filter_query,
         update={
             "$set": fields_to_update
@@ -372,8 +372,8 @@ async def delete_user(user_sessions: user_sessions_dependency) -> DeleteUserResp
     :raises HTTPException 404: If no user record exists.
     """
     # TODO: hardcoded for now -- will come from the discord bot.
-    username = FOUR_PLAYERS
-    filter_query = {
+    username: str = FOUR_PLAYERS
+    filter_query: dict[str, Any] = {
         "username": username
     }
 
