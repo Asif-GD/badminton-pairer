@@ -6,7 +6,8 @@ from pymongo.results import DeleteResult
 from starlette import status
 
 from database.models import user_sessions_dependency
-from database.req_res_models import ListPlayersResponse, NewPlayersRequest, MAX_PLAYER_COUNT, MIN_PLAYER_COUNT
+from database.req_res_models import ListPlayersResponse, NewPlayersRequest, MAX_PLAYER_COUNT, MIN_PLAYER_COUNT, \
+    DeleteUserResponse
 from validators import validate_player_name
 
 user_router = APIRouter(
@@ -372,14 +373,16 @@ async def update_players(new_players: NewPlayersRequest, user_sessions: user_ses
 
 @user_router.delete(
     "/delete_user",
+    response_model=DeleteUserResponse,
     response_description="Deletes the user.",
     status_code=status.HTTP_200_OK
 )
-async def delete_user(user_sessions: user_sessions_dependency):
+async def delete_user(user_sessions: user_sessions_dependency) -> DeleteUserResponse:
     """
         Deletes the user.
+
     :param user_sessions: Injected user_sessions collection dependency.
-    :return: A dict with a confirmation message.
+    :return: A confirmation message with username being deleted wrapped in DeleteUserResponse.
     :raises HTTPException 404: If no user record exists.
     """
     # TODO: hardcoded for now -- will come from the discord bot.
@@ -395,8 +398,8 @@ async def delete_user(user_sessions: user_sessions_dependency):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"No user with '{username}' found.")
 
-    response = {
-        "message": f"User {username} has been deleted."
-    }
+    response: DeleteUserResponse = DeleteUserResponse(
+        message=f"User {username} has been deleted."
+    )
 
     return response
