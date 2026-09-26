@@ -52,8 +52,8 @@ def create_session_id(username: str, player_list: list[str]) -> str:
 
 @pair_router.post(
     "/register",
-    response_model=NewPlayersResponse,
     response_description="Create a new user record and registers the players under the user.",
+    response_model=NewPlayersResponse,
     status_code=status.HTTP_201_CREATED
 )
 async def register_players(new_players: NewPlayersRequest,
@@ -110,6 +110,7 @@ async def register_players(new_players: NewPlayersRequest,
 @pair_router.patch(
     "/shuffle",
     response_description="Shuffles players and pairs them.",
+    response_model=PairingsResponse | PairingsWithBenchedPlayerResponse,
     status_code=status.HTTP_200_OK
 )
 async def shuffle_players(user_sessions: user_sessions_dependency) \
@@ -311,6 +312,7 @@ async def handle_12_player_pairings(players: list[str]) -> PairingsResponse:
 @pair_router.post(
     "/split",
     response_description="Split the players in pairs of two given by the user, randomly.",
+    response_model=SplitPlayersResponse,
     status_code=status.HTTP_200_OK
 )
 async def split_players(players: SplitPlayersRequest) -> SplitPlayersResponse:
