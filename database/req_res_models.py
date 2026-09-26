@@ -5,7 +5,7 @@ from typing import Final
 
 from pydantic import BaseModel, ConfigDict, field_validator, Field, computed_field
 
-from validators import validate_player_name
+from validators import normalize_and_check_duplicates
 
 MIN_PLAYER_COUNT: Final[int] = 4
 MAX_PLAYER_COUNT: Final[int] = 12
@@ -24,22 +24,18 @@ class NewPlayersRequest(BaseModel):
 
     @field_validator("players")
     @classmethod
-    def validate_players(cls, v):
+    def validate_players(cls, value: list[str]) -> list[str]:
         # rejects an empty list -- if user submits with no names, or blank lines
-        if not v:
+        if not value:
             raise ValueError("Players field cannot be empty.")
 
         # only supports 4 - 12 players for now.
-        if not (MIN_PLAYER_COUNT <= len(v) <= MAX_PLAYER_COUNT):
+        if not (MIN_PLAYER_COUNT <= len(value) <= MAX_PLAYER_COUNT):
             raise ValueError(f"Only {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT} players are supported. "
-                             f"(got {len(v)}).")
+                             f"(got {len(value)}).")
 
-        # checks for all per-name rules (length, whitespace, allowed characters, capitalization)
-        normalized_names = [validate_player_name(name) for name in v]
-
-        # rejects case-insensitive duplicate names
-        if len(set(normalized_names)) != len(normalized_names):  # -> set() doesn't support duplicate values.
-            raise ValueError("Players names must be unique (case-insensitive).")
+        # checks for all per-name rules (length, whitespace, allowed characters, capitalization) and duplicates.
+        normalized_names = normalize_and_check_duplicates(value)
 
         return normalized_names
 
