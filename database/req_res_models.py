@@ -9,6 +9,7 @@ from validators import normalize_and_check_duplicates
 
 MIN_PLAYER_COUNT: Final[int] = 4
 MAX_PLAYER_COUNT: Final[int] = 12
+MIN_SPLIT_PLAYER_COUNT: Final[int] = 3
 
 
 class NewPlayersRequest(BaseModel):
@@ -115,17 +116,14 @@ class SplitPlayersRequest(BaseModel):
 
     # list of names entered by the user, one per line in the Discord modal.
     # (bot strips leading/trailing whitespace per name before this reaches the API)
-    players: list[str] = Field(min_length=3)  # min 3: 1 can't be split, 2 doesn't need this endpoint's help
+    # min 3: 1 can't be split, 2 doesn't need this endpoint's help
+    players: list[str] = Field(min_length=MIN_SPLIT_PLAYER_COUNT)
 
     @field_validator("players")
     @classmethod
     def validate_players(cls, value: list[str]) -> list[str]:
-        # checks for all per-name rules (length, whitespace, allowed characters, capitalization)
-        normalized_names = [validate_player_name(name) for name in value]
-
-        # rejects case-insensitive duplicate names
-        if len(set(normalized_names)) != len(normalized_names):  # -> set() doesn't support duplicate values.
-            raise ValueError("Players names must be unique (case-insensitive).")
+        # checks for all per-name rules (length, whitespace, allowed characters, capitalization) and duplicates.
+        normalized_names = normalize_and_check_duplicates(value)
 
         return normalized_names
 
