@@ -40,3 +40,22 @@ def validate_player_name(name: str) -> str:
     name = '_'.join(part.capitalize() for part in name.split('_'))
 
     return name
+
+
+def normalize_and_check_duplicates(players: list[str]) -> list[str]:
+    """
+        Validates the players' name individually using validate_player_name();
+        then checks for duplicate names in the player list sent by the user.
+
+    :param players: The list of players' names.
+    :return: The list of players' names, after validation.
+    :raises ValueError: If there are duplicate entries.
+    """
+    # checks for all per-name rules (length, whitespace, allowed characters, capitalization)
+    validated_names = [validate_player_name(name) for name in players]
+
+    # rejects case-insensitive duplicate names
+    if len(set(validated_names)) != len(validated_names):  # -> set() doesn't support duplicate values.
+        raise ValueError("Players names must be unique (case-insensitive).")
+
+    return validated_names
