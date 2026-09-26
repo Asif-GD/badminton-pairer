@@ -42,6 +42,25 @@ def get_validated_player_name(name: str) -> str:
 name_validator_dependency = Annotated[str, Depends(get_validated_player_name)]
 
 
+def build_list_players_response(doc: dict[str, Any]) -> ListPlayersResponse:
+    """
+        Builds the ListPlayersResponse using fields in document from db.
+
+    :param doc: The document fetched from db.
+    :return: ListPlayersResponse model.
+    """
+    db_username: str = doc["username"]
+    db_no_of_players: int = doc["no_of_players"]
+    db_players: list[str] = doc["players"]
+    players_display: str = ", ".join(db_players)  # -> converts list[str] to str
+
+    return ListPlayersResponse(
+        username=db_username,
+        no_of_players=db_no_of_players,
+        players=players_display
+    )
+
+
 @user_router.get(
     "/list_players",
     description="Lists the players registered under user.",
@@ -75,16 +94,7 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
             detail=f"No user with username: '{username}' found. Please register."
         )
 
-    db_username = doc["username"]
-    db_no_of_players = doc["no_of_players"]
-    db_players = doc["players"]
-    players_display = ", ".join(db_players)  # -> converts list[str] to str
-
-    response = ListPlayersResponse(
-        username=db_username,
-        no_of_players=db_no_of_players,
-        players=players_display
-    )
+    response = build_list_players_response(doc)
 
     return response
 
@@ -186,16 +196,7 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
                    f"Please remove another player first."
         )
 
-    db_username = doc["username"]
-    db_no_of_players = doc["no_of_players"]
-    db_players = doc["players"]
-    players_display = ", ".join(db_players)  # -> convert list[str] to str
-
-    response = ListPlayersResponse(
-        username=db_username,
-        no_of_players=db_no_of_players,
-        players=players_display
-    )
+    response = build_list_players_response(doc)
 
     return response
 
@@ -302,16 +303,7 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
                    f"Please add another player first."
         )
 
-    db_username = doc["username"]
-    db_no_of_players = doc["no_of_players"]
-    db_players = doc["players"]
-    players_display = ", ".join(db_players)  # -> convert list[str] to str
-
-    response = ListPlayersResponse(
-        username=db_username,
-        no_of_players=db_no_of_players,
-        players=players_display
-    )
+    response = build_list_players_response(doc)
 
     return response
 
@@ -360,16 +352,7 @@ async def update_players(new_players: NewPlayersRequest, user_sessions: user_ses
             detail=f"No user with username: '{username}' found. Please register."
         )
 
-    db_username = doc["username"]
-    db_no_of_players = doc["no_of_players"]
-    db_players = doc["players"]
-    players_display = ", ".join(db_players)  # convert list[str] -> str, kept as separate name.
-
-    response = ListPlayersResponse(
-        username=db_username,
-        no_of_players=db_no_of_players,
-        players=players_display
-    )
+    response = build_list_players_response(doc)
 
     return response
 
