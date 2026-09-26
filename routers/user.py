@@ -44,8 +44,8 @@ name_validator_dependency = Annotated[str, Depends(get_validated_player_name)]
 
 @user_router.get(
     "/list_players",
-    response_model=ListPlayersResponse,
     description="Lists the players registered under user.",
+    response_model=ListPlayersResponse,
     status_code=status.HTTP_200_OK
 )
 async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersResponse:
@@ -92,6 +92,7 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
 @user_router.patch(
     "/add_player/{name}",
     response_description="Adds a player to the list of registered players under the user.",
+    response_model=ListPlayersResponse,
     status_code=status.HTTP_200_OK
 )
 async def add_player(name: name_validator_dependency, user_sessions: user_sessions_dependency) \
@@ -202,6 +203,7 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
 @user_router.patch(
     "/remove_player/{name}",
     response_description="Removes a player from the list of registered players under the user.",
+    response_model=ListPlayersResponse,
     status_code=status.HTTP_200_OK
 )
 async def remove_player(name: name_validator_dependency, user_sessions: user_sessions_dependency) \
@@ -317,6 +319,7 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
 @user_router.patch(
     "/update_players",
     response_description="Updates (replaces) the entire list of registered players under user.",
+    response_model=ListPlayersResponse,
     status_code=status.HTTP_200_OK
 )
 async def update_players(new_players: NewPlayersRequest, user_sessions: user_sessions_dependency) \
