@@ -112,14 +112,19 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
     response_model=ListPlayersResponse,
     status_code=status.HTTP_200_OK,
     responses={
+        400: {
+            "description": (
+                    "Player already registered under user, "
+                    "or user has maximum number of players registered."
+            )
+        },
         404: {"description": "No user record exists."},
-        400: {"description":
-                  "Player already registered under user, or user has maximum number of players registered."
-              },
-        409: {"description":
-                  "The user has the same set of players already registered under them, "
-                  "or the players list changed between read and update (race condition)"
-              },
+        409: {
+            "description": (
+                    "The user has the same set of players already registered under them, "
+                    "or the players list changed between read and update (race condition)."
+            )
+        },
         422: {"description": "Player name fails validation."}
     }
 )
