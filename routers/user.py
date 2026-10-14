@@ -108,7 +108,7 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
 
 @user_router.patch(
     "/add_player/{name}",
-    response_description="The updated list of players registered under the user.",
+    response_description="The updated list of players registered under the user, after addition.",
     response_model=ListPlayersResponse,
     status_code=status.HTTP_200_OK,
     responses={
