@@ -2,12 +2,14 @@ from typing import Final, Annotated, Any
 
 from fastapi import APIRouter, HTTPException, Depends
 from pymongo.asynchronous.collection import ReturnDocument
+from pymongo.errors import DuplicateKeyError
 from pymongo.results import DeleteResult
 from starlette import status
 
 from database.models import user_sessions_dependency
 from database.req_res_models import ListPlayersResponse, NewPlayersRequest, MAX_PLAYER_COUNT, MIN_PLAYER_COUNT, \
     DeleteUserResponse
+from session_utils import create_session_id
 from validators import validate_player_name
 
 user_router = APIRouter(
@@ -121,82 +123,112 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
     :raises HTTPException 404: If no user record exists.
     :raises HTTPException 400: If player already registered under user,
         or user has maximum number of players registered.
+    :raises HTTPException 409: In case the user has the same set of players already registered under them,
+        or if the players list changed between read and update (race condition)
     """
     # TODO: hardcoded for now -- will come from the discord bot.
     username: str = NINE_PLAYERS
 
-    # filter_query -> find user session of 'username' where 'name' isn't already registered under user
-    #     and number of players is less than MAX_PLAYER_COUNT
-    filter_query: dict[str, Any] = {
+    filter_query_for_find_one: dict[str, str] = {
+        "username": username,
+    }
+
+    current_doc: dict[str, Any] | None = await user_sessions.find_one(
+        filter=filter_query_for_find_one
+    )
+
+    # username wasn't found
+    if current_doc is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No user with username: '{username}' found. Please register."
+        )
+
+    db_players: list[str] = current_doc["players"]
+    db_no_of_players: int = current_doc["no_of_players"]
+
+    # user has maximum players registered already.
+    # note: >= is not needed here, strictly speaking;
+    #   because technically, the db_no_of_players can never exceed MAX_PLAYER_COUNT.
+    #   Still, it's better to cover it here and this way, it's one less thing to error out.
+    if db_no_of_players >= MAX_PLAYER_COUNT:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot add new player. User has {db_no_of_players} players registered. "
+                   f"Number of players allowed per user: {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT}. "
+                   f"Please remove another player first."
+        )
+
+    # player already registered under user
+    if name in db_players:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Player '{name}' already registered under this user. No duplicate entries allowed."
+        )
+
+    # we create a copy as it is required to create a guard on update to ensure atomicity
+    db_players_before_add: list[str] = db_players.copy()
+
+    db_players.append(name)
+    db_players.sort()  # better to store the players list in sorted order in db for uniformity
+
+    updated_session_id: str = create_session_id(username=username, player_list=db_players)
+
+    filter_query_for_update_one: dict[str, Any] = {
         "username": username,
         "players": {
-            "$ne": name  # -> no duplicates allowed
+            "$eq": db_players_before_add  # -> to ensure the value hasn't changed between read and update
         },
-        "$expr": {
-            "$lt": [{"$size": "$players"}, MAX_PLAYER_COUNT]  # number of players cannot exceed MAX_PLAYER_COUNT
+        # "players": db_players_before_add, # -> this works too
+    }
+
+    update_query: dict[str, Any] = {
+        "$set": {
+            "session_id": updated_session_id,
+            "players": db_players,
+            "no_of_players": len(db_players),
+            # Resetting benched/lucky/seventh player on update,
+            # since a new player list invalidates any previous rotation assignment.
+            "benched_players": [],
+            "lucky_players": [],
+            "seventh_player": None
         }
     }
 
-    # update_pipeline -> update happens as an aggregate-pipeline update because the 'no_of_players' should
-    #     reflect the length of 'players' after the player has been added.
-    update_pipeline: list[dict[str, Any]] = [
-        {
-            "$set": {
-                "players": {
-                    "$concatArrays": ["$players", [name]]  # -> adds the new player
-                },
-                # Resetting benched/lucky/seventh player on update,
-                # since a new player list invalidates any previous rotation assignment.
-                "benched_players": [],
-                "lucky_players": [],
-                "seventh_player": None
-            }
-        },
-        {
-            "$set": {
-                "no_of_players": {
-                    "$size": "$players"  # -> sets the size of length of the 'players'
-                }
-            }
-        }
-    ]
+    try:
+        updated_doc: dict[str, Any] | None = await user_sessions.find_one_and_update(
+            filter=filter_query_for_update_one,
+            update=update_query,
+            return_document=ReturnDocument.AFTER
+        )
+    except DuplicateKeyError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="You've already registered this exact set of players. "
+                   "Use command '/list_players' to view your registered set of players. "
+                   "Use command '/help' for more information."
+        )
 
-    doc: dict[str, Any] | None = await user_sessions.find_one_and_update(
-        filter_query,
-        update_pipeline,
-        return_document=ReturnDocument.AFTER
-    )
-
-    # doc could be None for multiple reasons
+    # the updated_doc could be None for multiple reasons
     #     - 1. username wasn't found
-    #     - 2. player already registered under user
-    #     - 3. user has maximum number of players registered.
-    if doc is None:
+    #     - 2. players list has changed between read and update (race condition)
+    if updated_doc is None:
         existing_user_doc: dict[str, Any] | None = await user_sessions.find_one({"username": username})
-
         # 1. username wasn't found
         if existing_user_doc is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"No user with username: '{username}' found. Please register."
             )
-
-        # 2. player already registered under user
-        if name in existing_user_doc["players"]:
+        # 2. players list has changed between read and update (race condition)
+        else:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Player '{name}' already registered under this user. No duplicate entries allowed."
+                status_code=status.HTTP_409_CONFLICT,
+                detail="User's list of players changed while updating. "
+                       "Please use command '/list_players' to check for errors and try again."
             )
 
-        # if neither 1 and 2, user has maximum players registered already.
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Cannot add new player. User has {existing_user_doc['no_of_players']} players registered. "
-                   f"Number of players allowed per user: {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT}. "
-                   f"Please remove another player first."
-        )
-
-    response = build_list_players_response(doc)
+    response: ListPlayersResponse = build_list_players_response(updated_doc)
 
     return response
 
