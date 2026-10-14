@@ -108,14 +108,25 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
 
 @user_router.patch(
     "/add_player/{name}",
-    response_description="Adds a player to the list of registered players under the user.",
+    response_description="The updated list of players registered under the user.",
     response_model=ListPlayersResponse,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
+    responses={
+        404: {"description": "No user record exists."},
+        400: {"description":
+                  "Player already registered under user, or user has maximum number of players registered."
+              },
+        409: {"description":
+                  "The user has the same set of players already registered under them, "
+                  "or the players list changed between read and update (race condition)"
+              },
+        422: {"description": "Player name fails validation."}
+    }
 )
 async def add_player(name: name_validator_dependency, user_sessions: user_sessions_dependency) \
         -> ListPlayersResponse:
     """
-        Adds a player to the list of registered players under the user.
+        Adds a player to the list of registered players under the user.\f
 
     :param name: Incoming path parameter that holds the player's name to be added.
     :param user_sessions: Injected user_sessions collections dependency.
