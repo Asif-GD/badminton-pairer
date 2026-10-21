@@ -279,7 +279,7 @@ async def remove_player(
         Removes a player from the list of registered players under the user.\f
 
     :param name: Incoming path parameter that holds the player's name to be removed.
-    :param user_sessions: Injected user_sessions collections dependency
+    :param user_sessions: Injected user_sessions collections dependency.
     :return: The updated players list for the user wrapped in ListPlayersResponse.
     :raises HTTPException 400: If player is not found registered under user,
         or user is at minimum number of players registered.
@@ -331,7 +331,7 @@ async def remove_player(
 
     # this way db_players remains unchanged, and we need it to create a guard on update to ensure atomicity
     db_players_after_remove: list[str] = [player for player in db_players if player != name]
-    db_players_after_remove.sort()  # -> sort isn't necessary here unlike append() but doing so as a preventive measure.
+    db_players_after_remove.sort()  # -> sort isn't necessary here unlike adding but doing so as a preventive measure.
 
     updated_session_id: str = create_session_id(username=username, player_list=db_players_after_remove)
 
