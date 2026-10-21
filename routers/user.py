@@ -125,20 +125,22 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
                     "or the players list changed between read and update (race condition)."
             )
         },
-        422: {"description": "Player name fails validation."}
+        422: {"description": "Player name fails validation."},
     }
 )
-async def add_player(name: name_validator_dependency, user_sessions: user_sessions_dependency) \
-        -> ListPlayersResponse:
+async def add_player(
+        name: name_validator_dependency,
+        user_sessions: user_sessions_dependency,
+) -> ListPlayersResponse:
     """
         Adds a player to the list of registered players under the user.\f
 
     :param name: Incoming path parameter that holds the player's name to be added.
     :param user_sessions: Injected user_sessions collections dependency.
     :return: The updated players list for the user wrapped in ListPlayersResponse.
-    :raises HTTPException 404: If no user record exists.
     :raises HTTPException 400: If player already registered under user,
         or user has maximum number of players registered.
+    :raises HTTPException 404: If no user record exists.
     :raises HTTPException 409: In case the user has the same set of players already registered under them,
         or if the players list changed between read and update (race condition)
     """
@@ -163,6 +165,13 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
     db_players: list[str] = current_doc["players"]
     db_no_of_players: int = current_doc["no_of_players"]
 
+    # player already registered under user
+    if name in db_players:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Player '{name}' already registered under this user. No duplicate entries allowed."
+        )
+
     # user has maximum players registered already.
     # note: >= is not needed here, strictly speaking;
     #   because technically, the db_no_of_players can never exceed MAX_PLAYER_COUNT.
@@ -175,25 +184,16 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
                    f"Please remove another player first."
         )
 
-    # player already registered under user
-    if name in db_players:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Player '{name}' already registered under this user. No duplicate entries allowed."
-        )
+    # this way db_players remains unchanged, and we need it to create a guard on update to ensure atomicity
+    db_players_after_add: list[str] = db_players + [name]
+    db_players_after_add.sort()  # better to store the players list in sorted order in db for uniformity
 
-    # we create a copy as it is required to create a guard on update to ensure atomicity
-    db_players_before_add: list[str] = db_players.copy()
-
-    db_players.append(name)
-    db_players.sort()  # better to store the players list in sorted order in db for uniformity
-
-    updated_session_id: str = create_session_id(username=username, player_list=db_players)
+    updated_session_id: str = create_session_id(username=username, player_list=db_players_after_add)
 
     filter_query_for_update_one: dict[str, Any] = {
         "username": username,
         "players": {
-            "$eq": db_players_before_add  # -> to ensure the value hasn't changed between read and update
+            "$eq": db_players  # -> to ensure the value hasn't changed between read and update
         },
         # "players": db_players_before_add, # -> this works too
     }
@@ -201,8 +201,8 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
     update_query: dict[str, Any] = {
         "$set": {
             "session_id": updated_session_id,
-            "players": db_players,
-            "no_of_players": len(db_players),
+            "players": db_players_after_add,
+            "no_of_players": len(db_players_after_add),
             # Resetting benched/lucky/seventh player on update,
             # since a new player list invalidates any previous rotation assignment.
             "benched_players": [],
@@ -223,7 +223,7 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
             detail="You've already registered this exact set of players. "
                    "Use command '/list_players' to view your registered set of players. "
                    "Use command '/help' for more information."
-        )
+        ) from None
 
     # the updated_doc could be None for multiple reasons
     #     - 1. username wasn't found
