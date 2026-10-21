@@ -251,77 +251,129 @@ async def add_player(name: name_validator_dependency, user_sessions: user_sessio
 
 @user_router.patch(
     "/remove_player/{name}",
-    response_description="Removes a player from the list of registered players under the user.",
+    response_description="The updated list of players registered under the user, after removal.",
     response_model=ListPlayersResponse,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
+    responses={
+        400: {
+            "description": (
+                    "Player is not found registered under user, "
+                    "or user is at minimum number of players registered."
+            )
+        },
+        404: {"description": "No user record exists."},
+        409: {
+            "description": (
+                    "The user has the same set of players already registered under them, "
+                    "or the players list changed between read and update (race condition)."
+            )
+        },
+        422: {"description": "Player name fails validation."},
+    }
 )
-async def remove_player(name: name_validator_dependency, user_sessions: user_sessions_dependency) \
-        -> ListPlayersResponse:
+async def remove_player(
+        name: name_validator_dependency,
+        user_sessions: user_sessions_dependency,
+) -> ListPlayersResponse:
     """
-        Removes a player from the list of registered players under the user.
+        Removes a player from the list of registered players under the user.\f
 
     :param name: Incoming path parameter that holds the player's name to be removed.
     :param user_sessions: Injected user_sessions collections dependency
     :return: The updated players list for the user wrapped in ListPlayersResponse.
-    :raises HTTPException 404: If no user record exists.
     :raises HTTPException 400: If player is not found registered under user,
         or user is at minimum number of players registered.
+    :raises HTTPException 404: If no user record exists.
+    :raises HTTPException 409: In case the user has the same set of players already registered under them,
+        or if the players list changed between read and update (race condition)
     """
     # TODO: hardcoded for now -- will come from the discord bot.
     username: str = NINE_PLAYERS
 
-    # filter_query -> find user session of 'username' where player == 'name' and
-    #     the number of players registered is greater than MIN_PLAYER_COUNT.
-    filter_query: dict[str, Any] = {
+    # filter_query -> find user session of 'username' where player == 'name'
+    filter_query_find_one: dict[str, str] = {
+        "username": username
+    }
+
+    current_doc: dict[str, Any] | None = await user_sessions.find_one(
+        filter=filter_query_find_one
+    )
+
+    # a record under username wasn't found
+    if current_doc is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No user with username: '{username}' found. Please register."
+        )
+
+    db_players: list[str] = current_doc["players"]
+    db_no_of_players: int = current_doc["no_of_players"]
+
+    # if the player is not found registered under user
+    if name not in db_players:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Player '{name}' not found registered under this user. "
+                   f"Please use command '/list_players' to check and try again."
+        )
+
+    # user has minimum players registered
+    # note: <= is not needed here, strictly speaking;
+    #   because technically, the db_no_of_players can never go below MIN_PLAYER_COUNT.
+    #   Still, it's better to cover it here and this way, it's one less thing to error out.
+    if db_no_of_players <= MIN_PLAYER_COUNT:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot remove player. User has {db_no_of_players} players registered. "
+                   f"Number of players allowed per user: {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT}. "
+                   f"Please add another player first."
+        )
+
+    # this way db_players remains unchanged, and we need it to create a guard on update to ensure atomicity
+    db_players_after_remove: list[str] = [player for player in db_players if player != name]
+    db_players_after_remove.sort()  # -> sort isn't necessary here unlike append() but doing so as a preventive measure.
+
+    updated_session_id: str = create_session_id(username=username, player_list=db_players_after_remove)
+
+    filter_query_for_find_one_and_update: dict[str, Any] = {
         "username": username,
-        "players": name,  # checks if 'name' is in the players[] list in db
-        "$expr": {
-            "$gt": [{"$size": "$players"}, MIN_PLAYER_COUNT]  # number of players cannot go below MIN_PLAYER_COUNT
+        "players": {
+            "$eq": db_players  # -> to ensure the value hasn't changed between read and update
+        },
+        # "players": db_players # -> this works too
+    }
+
+    update_query: dict[str, Any] = {
+        "$set": {
+            "session_id": updated_session_id,
+            "no_of_players": len(db_players_after_remove),
+            "players": db_players_after_remove,
+            # resetting benched/lucky/seventh player on update,
+            # since an updated player list invalidates any previous rotation assignment.
+            "benched_players": [],
+            "lucky_players": [],
+            "seventh_player": None
         }
     }
 
-    # update_pipeline -> update happens as an aggregate-pipeline update because the 'no_of_players' should
-    #     reflect the length of 'players' after the player has been removed.
-    update_pipeline: list[dict[str, Any]] = [
-        {
-            "$set": {
-                "players": {
-                    # filters the name out of players and updates players.
-                    "$filter": {
-                        "input": "$players",
-                        "as": "p",
-                        "cond": {
-                            "$ne": ["$$p", name]  # keep everyone except 'name'
-                        }
-                    }
-                },
-                # resetting benched/lucky/seventh player on update,
-                # since an updated player list invalidates any previous rotation assignment.
-                "benched_players": [],
-                "lucky_players": [],
-                "seventh_player": None
-            }
-        },
-        {
-            "$set": {
-                "no_of_players": {
-                    "$size": "$players"  # -> sets the size of length of the 'players'
-                }
-            }
-        }
-    ]
+    try:
+        updated_doc: dict[str, Any] | None = await user_sessions.find_one_and_update(
+            filter=filter_query_for_find_one_and_update,
+            update=update_query,
+            return_document=ReturnDocument.AFTER
+        )
+    except DuplicateKeyError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="You've already registered this exact set of players. "
+                   "Use command '/list_players' to view your registered set of players. "
+                   "Use command '/help' for more information."
+        ) from None
 
-    doc: dict[str, Any] | None = await user_sessions.find_one_and_update(
-        filter_query,
-        update_pipeline,
-        return_document=ReturnDocument.AFTER
-    )
-
-    # doc could be None for multiple reasons
+    # updated_doc could be None for multiple reasons because something changed in db between read and update (race)
     #     - 1. username wasn't found
-    #     - 2. player NOT registered under user
-    #     - 3. user has the minimum number of players registered, and cannot remove more.
-    if doc is None:
+    #     - 2. players list has changed
+    if updated_doc is None:
         existing_user_doc: dict[str, Any] | None = await user_sessions.find_one({"username": username})
 
         # 1. username wasn't found
@@ -331,22 +383,15 @@ async def remove_player(name: name_validator_dependency, user_sessions: user_ses
                 detail=f"No user with username: '{username}' found. Please register."
             )
 
-        # 2. player NOT registered under user
-        if name not in existing_user_doc["players"]:
+        # 2. players list has changed
+        else:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Player '{name}' not found registered under user."
+                status_code=status.HTTP_409_CONFLICT,
+                detail="User's list of players changed while updating. "
+                       "Please use command '/list_players' to check for errors and try again."
             )
 
-        # if neither 1 and 2, user has minimum players registered and no more players can be removed.
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Cannot remove player. User has {existing_user_doc['no_of_players']} players registered. "
-                   f"Number of players allowed per user: {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT}. "
-                   f"Please add another player first."
-        )
-
-    response = build_list_players_response(doc)
+    response: ListPlayersResponse = build_list_players_response(updated_doc)
 
     return response
 
