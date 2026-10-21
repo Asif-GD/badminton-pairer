@@ -190,12 +190,12 @@ async def add_player(
 
     updated_session_id: str = create_session_id(username=username, player_list=db_players_after_add)
 
-    filter_query_for_update_one: dict[str, Any] = {
+    filter_query_for_find_one_and_update: dict[str, Any] = {
         "username": username,
         "players": {
             "$eq": db_players  # -> to ensure the value hasn't changed between read and update
         },
-        # "players": db_players_before_add, # -> this works too
+        # "players": db_players, # -> this works too
     }
 
     update_query: dict[str, Any] = {
@@ -213,7 +213,7 @@ async def add_player(
 
     try:
         updated_doc: dict[str, Any] | None = await user_sessions.find_one_and_update(
-            filter=filter_query_for_update_one,
+            filter=filter_query_for_find_one_and_update,
             update=update_query,
             return_document=ReturnDocument.AFTER
         )
