@@ -42,7 +42,7 @@ def get_validated_player_name(name: str) -> str:
     try:
         return validate_player_name(name)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e)) from None
 
 
 name_validator_dependency = Annotated[str, Depends(get_validated_player_name)]
