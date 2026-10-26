@@ -72,7 +72,7 @@ async def register_players(new_players: NewPlayersRequest,
             detail="You've already registered this exact set of players. "
                    "Use command '/list_players' to view your registered set of players. "
                    "Use command '/help' for more information."
-        )
+        ) from None
 
     registered_players: str = ", ".join(new_players.players)  # -> converts list[str] to str
 
