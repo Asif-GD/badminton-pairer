@@ -398,28 +398,42 @@ async def remove_player(
 
 @user_router.patch(
     "/update_players",
-    response_description="Updates (replaces) the entire list of registered players under user.",
+    response_description="The updated list of players registered under the user.",
     response_model=ListPlayersResponse,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
+    responses={
+        404: {"description": "No user record exists."},
+        409: {"description": "The user has the same set of players already registered under them."},
+    }
 )
-async def update_players(new_players: NewPlayersRequest, user_sessions: user_sessions_dependency) \
-        -> ListPlayersResponse:
+async def update_players(
+        new_players: NewPlayersRequest, user_sessions: user_sessions_dependency
+) -> ListPlayersResponse:
     """
-        Updates (replaces) the entire list of registered players under user.
+        Updates (replaces) the entire list of registered players under user and
+            resets the fields benched_players, lucky_players, and seventh_player.\f
 
     :param new_players: Incoming request body containing the new list of players.
     :param user_sessions: Injected user_sessions collection dependency.
     :return: The updated players list for the user wrapped in ListPlayersResponse.
     :raises HTTPException 404: If no user record exists.
+    :raises HTTPException 409: In case the user has the same set of players already registered under them.
     """
     # TODO: hardcoded for now -- will come from the discord bot.
     username: str = FOUR_PLAYERS
     filter_query: dict[str, Any] = {
         "username": username
     }
+
+    # always sort the list to be stored into the db
+    new_players_list: list[str] = sorted(new_players.players)
+
+    updated_session_id: str = create_session_id(username=username, player_list=new_players_list)
+
     fields_to_update: dict[str, Any] = {
-        "players": new_players.players,
-        "no_of_players": len(new_players.players),
+        "session_id": updated_session_id,
+        "players": new_players_list,
+        "no_of_players": len(new_players_list),
         # Resetting benched/lucky/seventh player on update,
         # since a new player list invalidates any previous rotation assignment.
         "benched_players": [],
@@ -427,21 +441,33 @@ async def update_players(new_players: NewPlayersRequest, user_sessions: user_ses
         "seventh_player": None
     }
 
-    doc: dict[str, Any] | None = await user_sessions.find_one_and_update(
-        filter_query,
-        update={
-            "$set": fields_to_update
-        },
-        return_document=ReturnDocument.AFTER,  # return document after update.
-    )
+    try:
+        doc: dict[str, Any] | None = await user_sessions.find_one_and_update(
+            filter_query,
+            update={
+                "$set": fields_to_update
+            },
+            return_document=ReturnDocument.AFTER,  # return document after update.
+        )
 
+    except DuplicateKeyError:
+        # TODO: one-user -> multiple session redesign is planned.
+        # this 409 is only reachable while a user can hold multiple documents; revisit after the redesign.
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="You've already registered this exact set of players. "
+                   "Use command '/list_players' to view your registered set of players. "
+                   "Use command '/help' for more information."
+        ) from None
+
+    # username is not found
     if doc is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"No user with username: '{username}' found. Please register."
         )
 
-    response = build_list_players_response(doc)
+    response: ListPlayersResponse = build_list_players_response(doc)
 
     return response
 
