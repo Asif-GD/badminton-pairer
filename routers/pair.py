@@ -311,7 +311,6 @@ async def split_players(new_players: SplitPlayersRequest) -> SplitPlayersRespons
     :return: The pairings of players and unpaired player, if any wrapped in a SplitPlayersResponse.
     """
 
-
     pairings, unpaired_player = split(player_list=new_players.players)
 
     response: SplitPlayersResponse = SplitPlayersResponse(
