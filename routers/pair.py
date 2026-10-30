@@ -303,15 +303,16 @@ async def handle_12_player_pairings(players: list[str]) -> PairingsResponse:
     response_model=SplitPlayersResponse,
     status_code=status.HTTP_200_OK,
 )
-async def split_players(players: SplitPlayersRequest) -> SplitPlayersResponse:
+async def split_players(new_players: SplitPlayersRequest) -> SplitPlayersResponse:
     """
         Split the players in pairs of two given by the user, randomly.\f
 
-    :param players: The list of players to be paired.
+    :param new_players: The list of players to be paired.
     :return: The pairings of players and unpaired player, if any wrapped in a SplitPlayersResponse.
     """
 
-    pairings, unpaired_player = split(player_list=players.players)
+
+    pairings, unpaired_player = split(player_list=new_players.players)
 
     response: SplitPlayersResponse = SplitPlayersResponse(
         teams=pairings,
