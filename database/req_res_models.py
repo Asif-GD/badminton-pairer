@@ -80,13 +80,13 @@ class PairingsWithBenchedPlayerResponse(BaseModel):
                     "1": "Alex, Ben",
                     "2": "Chris, Dylan"
                 },
-                "benched_player": "Eric"
+                "benched_players": "Eric"
             }
         }
     )
 
     teams: dict[str, str]
-    benched_player: str
+    benched_players: str
 
 
 class ListPlayersResponse(BaseModel):

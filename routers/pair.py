@@ -230,7 +230,7 @@ async def handle_5_9_10_or_11_player_pairings(username: str, players: list[str],
 
     response: PairingsWithBenchedPlayerResponse = PairingsWithBenchedPlayerResponse(
         teams=pairings,
-        benched_player=players_display
+        benched_players=players_display
     )
 
     return response
