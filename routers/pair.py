@@ -30,14 +30,19 @@ TWELVE_PLAYERS: Final[str] = "place_holder_12"
 
 @pair_router.post(
     "/register",
-    response_description="Create a new user record and registers the players under the user.",
+    response_description="The new record’s id, the registered players and a success status",
     response_model=NewPlayersResponse,
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        409: {"description": "The user has the same set of players already registered under them."},
+    },
 )
-async def register_players(new_players: NewPlayersRequest,
-                           user_sessions: user_sessions_dependency) -> NewPlayersResponse:
+async def register_players(
+        new_players: NewPlayersRequest,
+        user_sessions: user_sessions_dependency
+) -> NewPlayersResponse:
     """
-        Creates a new user record with the list of players under the user in the 'user_sessions' Collection.
+        Creates a new user record with the list of players under the user in the 'user_sessions' Collection.\f
 
     :param new_players: Incoming request body containing the new list of players.
     :param user_sessions: Injected user_sessions collection dependency.
@@ -87,18 +92,23 @@ async def register_players(new_players: NewPlayersRequest,
 
 @pair_router.patch(
     "/shuffle",
-    response_description="Shuffles players and pairs them.",
+    response_description="The list of players paired with benched players (if any).",
     response_model=PairingsResponse | PairingsWithBenchedPlayerResponse,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
+    responses={
+        404: {"description": "No user record exists."},
+        500: {"description": "If the stored player count is outside the supported range."},
+    },
 )
-async def shuffle_players(user_sessions: user_sessions_dependency) \
-        -> PairingsResponse | PairingsWithBenchedPlayerResponse:
+async def shuffle_players(
+        user_sessions: user_sessions_dependency
+) -> PairingsResponse | PairingsWithBenchedPlayerResponse:
     """
-        Shuffles players and pairs them into teams and returns it to user.
+        Shuffles players and pairs them into teams and returns it to user.\f
 
     :param user_sessions: Injected user_sessions collection dependency.
     :return: The players paired into teams wrapped in a PairingsResponse or PairingsWithBenchedPlayerResponse model.
-    :raises HTTPException 404: If user has no registered players under them.
+    :raises HTTPException 404: If no user record exists.
     :raises HTTPException 500: If the stored player count is outside the supported range (data-integrity issue).
     """
     # TODO: hardcoded for now -- will come from the discord bot.
@@ -289,13 +299,13 @@ async def handle_12_player_pairings(players: list[str]) -> PairingsResponse:
 
 @pair_router.post(
     "/split",
-    response_description="Split the players in pairs of two given by the user, randomly.",
+    response_description="The list of players in pairs of two.",
     response_model=SplitPlayersResponse,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
 )
 async def split_players(players: SplitPlayersRequest) -> SplitPlayersResponse:
     """
-        Split the players in pairs of two given by the user, randomly.
+        Split the players in pairs of two given by the user, randomly.\f
 
     :param players: The list of players to be paired.
     :return: The pairings of players and unpaired player, if any wrapped in a SplitPlayersResponse.
