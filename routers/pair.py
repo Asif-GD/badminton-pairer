@@ -30,7 +30,7 @@ TWELVE_PLAYERS: Final[str] = "place_holder_12"
 
 @pair_router.post(
     "/register",
-    response_description="The new record’s id, the registered players and a success status",
+    response_description="The new record’s id, the registered players and a success status.",
     response_model=NewPlayersResponse,
     status_code=status.HTTP_201_CREATED,
     responses={
@@ -195,7 +195,7 @@ async def handle_5_9_10_or_11_player_pairings(username: str, players: list[str],
     :param players: The list of players to be paired.
     :param benched_players: The list of players already benched, if any.
     :param user_sessions: Injected user_sessions collections dependency.
-    :return: The paired players and a benched player wrapped in a PairingsWithBenchedPlayerResponse model.
+    :return: The paired players and benched players wrapped in a PairingsWithBenchedPlayerResponse model.
     :raises HTTPException 404: If the user's session was not found during the update (e.g. deleted concurrently).
     """
     pairings, benched_players = pair_5_9_10_or_11_players(player_list=players, benched_player_list=benched_players)
