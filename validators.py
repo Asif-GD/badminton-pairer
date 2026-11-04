@@ -1,3 +1,25 @@
+import re
+from typing import Final
+
+# Check A -> reading the pattern left to right
+# [A-Za-z0-9_]+ -> accepts one or more of letters, digits or underscore, nothing else.
+# for example,
+#   invalid name -> "José"
+#   valid name -> "john", "john_doe"
+ALLOWED_CHAR_PATTERN: Final[re.Pattern[str]] = re.compile(r"[A-Za-z0-9_]+")
+
+# Check B -> reading the pattern left to right
+# [A-Za-z0-9]+ -> first part of the name; can be chars (more than 1) of english alphabets (both cases) and numbers.
+# (?: ... ) -> an optional part.
+# _[A-Za-z0-9]+ -> similar to first part, but it starts with a '_' and this part is optional.
+# So, a name must start with an alphabet or a number and if it has a second part, the second must begin with an
+#   underscore followed by alphabets or numbers.
+# for example,
+#   invalid names -> leading "_abc", trailing "abc_", doubled "a__b", or just "___"
+#   valid names -> "abc", "abc_def"
+NAME_PATTERN: Final[re.Pattern[str]] = re.compile(r"[A-Za-z0-9]+(?:_[A-Za-z0-9]+)?")
+
+
 def validate_player_name(name: str) -> str:
     """
         Validates the player names against preset rules
@@ -29,11 +51,20 @@ def validate_player_name(name: str) -> str:
     elif not 3 <= len(name) <= 30:
         raise ValueError(f"Name '{name}' must be between 3 to 30 characters long.")
 
-    # no special characters allowed, except underscore.
-    elif not all(ch.isalnum() or ch == "_" for ch in name):
+    # check A: every character must come from the allowed set.
+    # runs first, so that if it passes, any later failure can only be about underscores.
+    elif not ALLOWED_CHAR_PATTERN.fullmatch(name):
         raise ValueError(
-            f"Name '{name}' contains invalid characters. Only letters, numbers, and a single "
-            f"underscore separator (e.g. 'firstname_lastname') are allowed."
+            f"Name '{name}' contains invalid characters. Only letters, numbers and an "
+            f"underscore are allowed."
+        )
+
+    # check B: the characters are fine, a failure here must be underscore placement.
+    # this check covers cases like "_bob", "bob_", "a__b" and "a_b_c".
+    elif not NAME_PATTERN.fullmatch(name):
+        raise ValueError(
+            f"'{name}' is an invalid format. A name must be a single name (e.g. 'john') "
+            f"or two parts separated by one underscore (e.g. 'john_doe')."
         )
 
     # in case user entered john_doe -> John_Doe, alex -> Alex
