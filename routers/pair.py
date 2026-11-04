@@ -185,9 +185,10 @@ async def handle_4_6_or_8_player_pairings(players: list[str]) -> PairingsRespons
     return response
 
 
-async def handle_5_9_10_or_11_player_pairings(username: str, players: list[str], benched_players: list[str],
-                                              user_sessions: user_sessions_dependency) \
-        -> PairingsWithBenchedPlayerResponse:
+async def handle_5_9_10_or_11_player_pairings(
+        username: str, players: list[str], benched_players: list[str],
+        user_sessions: user_sessions_dependency
+) -> PairingsWithBenchedPlayerResponse:
     """
         Pairs the players and wraps it into the PairingsWithBenchedPlayerResponse model. Also updates db.
 
