@@ -148,7 +148,7 @@ async def shuffle_players(
     db_players: list[str] = doc["players"]
     db_benched_players: list[str] = doc["benched_players"]
     db_lucky_players: list[str] = doc["lucky_players"]
-    db_seventh_player: str = doc["seventh_player"]
+    db_seventh_player: str | None = doc["seventh_player"]
 
     if db_player_count in {4, 6, 8}:
         return await handle_4_6_or_8_player_pairings(players=db_players)
@@ -236,8 +236,10 @@ async def handle_5_9_10_or_11_player_pairings(username: str, players: list[str],
     return response
 
 
-async def handle_7_player_pairings(username: str, players: list[str], lucky_players: list[str], seventh_player: str,
-                                   user_sessions: user_sessions_dependency) -> PairingsResponse:
+async def handle_7_player_pairings(
+        username: str, players: list[str], lucky_players: list[str],
+        seventh_player: str | None, user_sessions: user_sessions_dependency
+) -> PairingsResponse:
     """
         Pairs the players and wraps it into the PairingsResponse model. Also updates db.
 
