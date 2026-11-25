@@ -101,7 +101,7 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
     if doc is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No user with username: '{username}' found. Please register."
+            detail=f"No session found for user '{username}'. Please register."
         )
 
     response: ListPlayersResponse = build_list_players_response(doc)
@@ -162,7 +162,7 @@ async def add_player(
     if current_doc is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No user with username: '{username}' found. Please register."
+            detail=f"No session found for user '{username}'. Please register."
         )
 
     db_players: list[str] = current_doc["players"]
@@ -237,7 +237,7 @@ async def add_player(
         if existing_user_doc is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No user with username: '{username}' found. Please register."
+                detail=f"No session found for user '{username}'. Please register."
             )
         # 2. players list has changed between read and update (race condition)
         else:
@@ -306,7 +306,7 @@ async def remove_player(
     if current_doc is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No user with username: '{username}' found. Please register."
+            detail=f"No session found for user '{username}'. Please register."
         )
 
     db_players: list[str] = current_doc["players"]
@@ -383,7 +383,7 @@ async def remove_player(
         if existing_user_doc is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No user with username: '{username}' found. Please register."
+                detail=f"No session found for user '{username}'. Please register."
             )
 
         # 2. players list has changed
@@ -467,7 +467,7 @@ async def update_players(
     if doc is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No user with username: '{username}' found. Please register."
+            detail=f"No session found for user '{username}'. Please register."
         )
 
     response: ListPlayersResponse = build_list_players_response(doc)
