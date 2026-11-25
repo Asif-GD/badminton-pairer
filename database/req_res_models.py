@@ -21,22 +21,28 @@ class NewPlayersRequest(BaseModel):
         }
     )
     # list of names entered by the user, one per line in the Discord modal.
-    players: list[str]  # (bot strips leading/trailing whitespace per name before this reaches the API)
+    # bot strips leading/trailing whitespace per name before this reaches the API
+    # Field(min_length=...) -> documents the rule in the OpenAPI schema (minItems: 4, maxItems: 12)
+    players: list[str] = Field(min_length=MIN_PLAYER_COUNT, max_length=MAX_PLAYER_COUNT)
+
+    # mode="before" -> runs BEFORE Pydantic's built-in checks, including min_length, max_length
+    # so our friendly message is raised first and Pydantic's generic one never appears.
+    @field_validator("players", mode="before")
+    @classmethod
+    def validate_number_of_players(cls, value: object) -> object:
+        # only supports 4 - 12 players for now.
+        # the input is still raw here (could be anything), so guard before calling len()
+        if isinstance(value, list) and not (MIN_PLAYER_COUNT <= len(value) <= MAX_PLAYER_COUNT):
+            raise ValueError(f"Only {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT} players are supported. "
+                             f"(got {len(value)}).")
+
+        return value
 
     @field_validator("players")
     @classmethod
     def validate_players(cls, value: list[str]) -> list[str]:
-        # rejects an empty list -- if user submits with no names, or blank lines
-        if not value:
-            raise ValueError("Players field cannot be empty.")
-
-        # only supports 4 - 12 players for now.
-        if not (MIN_PLAYER_COUNT <= len(value) <= MAX_PLAYER_COUNT):
-            raise ValueError(f"Only {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT} players are supported. "
-                             f"(got {len(value)}).")
-
         # checks for all per-name rules (length, whitespace, allowed characters, capitalization) and duplicates.
-        normalized_names = normalize_and_check_duplicates(value)
+        normalized_names: list[str] = normalize_and_check_duplicates(value)
 
         return normalized_names
 
