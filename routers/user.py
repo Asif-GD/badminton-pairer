@@ -69,13 +69,16 @@ def build_list_players_response(doc: dict[str, Any]) -> ListPlayersResponse:
 
 @user_router.get(
     "/list_players",
-    description="Lists the players registered under user.",
+    response_description="Lists the players registered under user.",
     response_model=ListPlayersResponse,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
+    responses={
+        404: {"description": "No user record exists."},
+    }
 )
 async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersResponse:
     """
-        Lists the players registered under the user.
+        Lists the players registered under the user.\f
 
     :param user_sessions: Injected user_sessions collections dependency.
     :return: The list of players registered under the user wrapped in ListPlayersResponse.
