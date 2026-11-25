@@ -12,6 +12,9 @@ MONGO_DB_HOST: Final[str] = "localhost"
 MONGO_DB_PORT: Final[int] = 27017  # -> default port
 MONGO_DB_NAME: Final[str] = "pair-db"
 
+# 'pair-db' collections
+USER_SESSIONS_COLLECTION: Final[str] = "user_sessions"
+
 # uri format -> f"mongodb://{MONGO_DB_USERNAME}:{MONGO_DB_PASSWORD}@{MONGO_DB_HOST}:{MONGO_DB_PORT}/{MONGO_DB_NAME}"
 MONGO_DB_URI: Final[str] = f"mongodb://{MONGO_DB_HOST}:{MONGO_DB_PORT}/{MONGO_DB_NAME}"
 

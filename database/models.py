@@ -7,7 +7,7 @@ from fastapi import Depends
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 from pymongo.asynchronous.collection import AsyncCollection
 
-from database.database import db_dependency
+from database.database import db_dependency, USER_SESSIONS_COLLECTION
 
 # PyObjectId — bridges MongoDB's ObjectId and Pydantic/JSON's str
 """
@@ -62,7 +62,7 @@ class UserSession(BaseModel):
 
 
 def get_user_sessions_collection(db: db_dependency) -> AsyncCollection:
-    return db.get_collection("user_sessions")
+    return db.get_collection(name=USER_SESSIONS_COLLECTION)
 
 
 user_sessions_dependency = Annotated[AsyncCollection, Depends(get_user_sessions_collection)]

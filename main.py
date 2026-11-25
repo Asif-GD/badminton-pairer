@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from pymongo import AsyncMongoClient
 from pymongo.asynchronous.collection import AsyncCollection
 
-from database.database import MONGO_DB_URI, MONGO_DB_NAME
+from database.database import MONGO_DB_URI, MONGO_DB_NAME, USER_SESSIONS_COLLECTION
 from routers.pair import pair_router
 from routers.user import user_router
 
@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
             if it already exists with the same specification on every app restart.
     """
     user_sessions_collection: AsyncCollection[Mapping[str, Any]] = (
-        app.state.mongo_client[MONGO_DB_NAME]["user_sessions"]
+        app.state.mongo_client.get_database(name=MONGO_DB_NAME).get_collection(name=USER_SESSIONS_COLLECTION)
     )
     await user_sessions_collection.create_index("session_id", unique=True)
 
