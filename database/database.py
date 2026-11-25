@@ -25,7 +25,7 @@ MONGO_DB_URI: Final[str] = f"mongodb://{MONGO_DB_HOST}:{MONGO_DB_PORT}/{MONGO_DB
 # This does NOT open a new connection — it just returns a handle that borrows from the AsyncMongoClient's
 # existing pool, so calling it per-request is cheap and safe.
 def get_db(request: Request) -> AsyncDatabase:
-    # get_database() uses the database name in URI by default.
+    # if 'name=' isn't specified, get_database() uses the database name in URI by default.
     return request.app.state.mongo_client.get_database(name=MONGO_DB_NAME)
 
 
