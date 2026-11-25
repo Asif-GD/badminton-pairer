@@ -117,12 +117,17 @@ class SplitPlayersRequest(BaseModel):
 
     # list of names entered by the user, one per line in the Discord modal.
     # (bot strips leading/trailing whitespace per name before this reaches the API)
-    # min 3: 1 can't be split, 2 doesn't need this endpoint's help
+    # a minimum of 3 players: 1 can't be split, 2 doesn't need this endpoint's help
     players: list[str] = Field(min_length=MIN_SPLIT_PLAYER_COUNT)
 
     @field_validator("players")
     @classmethod
     def validate_players(cls, value: list[str]) -> list[str]:
+        # a minimum of 3 players: 1 can't be split, 2 doesn't need this endpoint's help
+        if not (len(value) >= MIN_SPLIT_PLAYER_COUNT):
+            raise ValueError(f"A minimum of {MIN_SPLIT_PLAYER_COUNT} players required. "
+                             f"(got {len(value)}).")
+
         # checks for all per-name rules (length, whitespace, allowed characters, capitalization) and duplicates.
         normalized_names = normalize_and_check_duplicates(value)
 
