@@ -125,7 +125,7 @@ class SplitPlayersRequest(BaseModel):
     # so our friendly message is raised first and Pydantic's generic one never appears.
     @field_validator("players", mode="before")
     @classmethod
-    def number_of_players(cls, value: object) -> object:
+    def validate_number_of_players(cls, value: object) -> object:
         # the input is still raw here (could be anything), so guarding it before calling len()
         if isinstance(value, list) and len(value) < MIN_SPLIT_PLAYER_COUNT:
             raise ValueError(f"A minimum of {MIN_SPLIT_PLAYER_COUNT} players required. "
