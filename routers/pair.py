@@ -226,8 +226,8 @@ async def handle_5_9_10_or_11_player_pairings(
     no_of_players_to_be_benched: int = len(players) % 4
     # players benched this pairing are appended to the end of the list
     # so, extracting only them using list slice
-    benched_players: list[str] = benched_players[- no_of_players_to_be_benched:]
-    players_display: str = ", ".join(benched_players)  # converts the list[str] to str
+    benched_players_this_turn: list[str] = benched_players[- no_of_players_to_be_benched:]
+    players_display: str = ", ".join(benched_players_this_turn)  # converts the list[str] to str
 
     response: PairingsWithBenchedPlayerResponse = PairingsWithBenchedPlayerResponse(
         teams=pairings,
