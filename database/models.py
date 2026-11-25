@@ -24,8 +24,8 @@ class UserSession(BaseModel):
         Container for a single record, as stored in / returned from MongoDB.
     """
     model_config = ConfigDict(
-        populate_by_name=True,
-        arbitrary_types_allowed=True,
+        validate_by_name=True,
+        validate_by_alias=True,
         json_schema_extra={
             "example": {
                 "_id": "507f1f77bcf86cd799439011",
