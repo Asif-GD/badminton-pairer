@@ -478,12 +478,15 @@ async def update_players(
 @user_router.delete(
     "/delete_user",
     response_model=DeleteUserResponse,
-    response_description="Deletes the user.",
-    status_code=status.HTTP_200_OK
+    response_description="A message containing the user's username that was deleted.",
+    status_code=status.HTTP_200_OK,
+    responses={
+        404: {"description": "No user record exists."},
+    }
 )
 async def delete_user(user_sessions: user_sessions_dependency) -> DeleteUserResponse:
     """
-        Deletes the user.
+        Deletes the user.\f
 
     :param user_sessions: Injected user_sessions collection dependency.
     :return: A confirmation message with username being deleted wrapped in DeleteUserResponse.
@@ -499,8 +502,10 @@ async def delete_user(user_sessions: user_sessions_dependency) -> DeleteUserResp
     result: DeleteResult = await user_sessions.delete_one(filter_query)
 
     if result.deleted_count == 0:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"No user with '{username}' found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No session found for user '{username}'. Please register."
+        )
 
     response: DeleteUserResponse = DeleteUserResponse(
         message=f"User {username} has been deleted."
