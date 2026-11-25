@@ -163,7 +163,7 @@ class DeleteUserResponse(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "message": "User 'username' has been deleted."
+                "message": "User {username} has been deleted."
             }
         }
     )
