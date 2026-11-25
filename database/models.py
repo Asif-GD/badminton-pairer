@@ -30,9 +30,9 @@ class UserSession(BaseModel):
             "example": {
                 "_id": "507f1f77bcf86cd799439011",
                 "username": "discord_username",
-                "session_id": "abc123",
-                "no_of_players": 3,
-                "players": ["Alex", "Bob", "Chris", "Dylan", "Eric"],
+                "session_id": "af932064e525d5a6",
+                "no_of_players": 7,
+                "players": ["Alex", "Bob", "Chris", "Dylan", "Eric", "Fred", "Greg"],
                 "benched_players": ["Eric"],
                 "lucky_players": ["Bob"],
                 "seventh_player": "Fred",
