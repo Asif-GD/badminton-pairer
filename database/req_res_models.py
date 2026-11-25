@@ -43,7 +43,8 @@ class NewPlayersRequest(BaseModel):
 
 class NewPlayersResponse(BaseModel):
     model_config = ConfigDict(
-        populate_by_name=True,
+        validate_by_name=True,
+        validate_by_alias=True,
         json_schema_extra={
             "example": {
                 "_id": "random_string",
