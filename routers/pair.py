@@ -8,7 +8,7 @@ from starlette import status
 from database.models import UserSession, user_sessions_dependency
 from database.req_res_models import NewPlayersResponse, NewPlayersRequest, PairingsResponse, \
     PairingsWithBenchedPlayerResponse, SplitPlayersRequest, SplitPlayersResponse
-from pair_players import *
+from pair_players import pair_4_6_or_8_players, pair_5_9_10_or_11_players, pair_7_players, pair_12_players, split
 from session_utils import create_session_id
 
 pair_router = APIRouter(
