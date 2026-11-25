@@ -101,7 +101,7 @@ async def list_players(user_sessions: user_sessions_dependency) -> ListPlayersRe
             detail=f"No user with username: '{username}' found. Please register."
         )
 
-    response = build_list_players_response(doc)
+    response: ListPlayersResponse = build_list_players_response(doc)
 
     return response
 

@@ -68,7 +68,7 @@ def validate_player_name(name: str) -> str:
         )
 
     # in case user entered john_doe -> John_Doe, alex -> Alex
-    name = '_'.join(part.capitalize() for part in name.split('_'))
+    name: str = '_'.join(part.capitalize() for part in name.split('_'))
 
     return name
 
@@ -83,7 +83,7 @@ def normalize_and_check_duplicates(players: list[str]) -> list[str]:
     :raises ValueError: If there are duplicate entries.
     """
     # checks for all per-name rules (length, whitespace, allowed characters, capitalization)
-    validated_names = [validate_player_name(name) for name in players]
+    validated_names: list[str] = [validate_player_name(name) for name in players]
 
     # rejects case-insensitive duplicate names
     if len(set(validated_names)) != len(validated_names):  # -> set() doesn't support duplicate values.

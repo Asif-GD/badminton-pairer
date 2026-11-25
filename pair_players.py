@@ -150,7 +150,7 @@ def pair_7_players(player_list: list[str], lucky_player_list: list[str], seventh
         lucky_player_this_pairing: str = lucky_players.pop(0)
 
     else:
-        lucky_player_this_pairing: str = random.choice(player_list_copy)
+        lucky_player_this_pairing = random.choice(player_list_copy)
 
         # to ensure every player gets to be lucky_player at least once
         while lucky_player_this_pairing in lucky_players:  # reject-sampling
