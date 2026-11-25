@@ -33,9 +33,9 @@ class UserSession(BaseModel):
                 "session_id": "af932064e525d5a6",
                 "no_of_players": 7,
                 "players": ["Alex", "Bob", "Chris", "Dylan", "Eric", "Fred", "Greg"],
-                "benched_players": ["Eric"],
+                "benched_players": [],
                 "lucky_players": ["Bob"],
-                "seventh_player": "Fred",
+                "seventh_player": "Bob",
             }
         }
     )
